@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { Upload, FileText, X, Loader2, CheckCircle2, Circle } from "lucide-react";
+import { Upload, FileText, X, Loader2, CheckCircle2, Circle, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
+
+type SavedResume = { resumeId: string; fileName: string };
 
 type AnalysisResult = {
   atsScore: number;
@@ -26,11 +28,36 @@ type State =
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export function ResumeUploader() {
+  const [mode, setMode] = useState<"upload" | "select">("upload");
   const [file, setFile] = useState<File | null>(null);
+  const [selectedResumeId, setSelectedResumeId] = useState<string>("");
+  const [savedResumes, setSavedResumes] = useState<SavedResume[]>([]);
+  const [loadingResumes, setLoadingResumes] = useState(false);
   const [jd, setJd] = useState("");
   const [dragging, setDragging] = useState(false);
   const [state, setState] = useState<State>({ status: "idle" });
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch saved resumes on mount and when switching to select mode
+  useEffect(() => {
+    if (mode === "select") fetchSavedResumes();
+  }, [mode]);
+
+  async function fetchSavedResumes() {
+    setLoadingResumes(true);
+    try {
+      const res = await fetch("/api/resumes/list");
+      if (res.ok) {
+        const data: SavedResume[] = await res.json();
+        setSavedResumes(data);
+        if (data.length > 0 && !selectedResumeId) setSelectedResumeId(data[0].resumeId);
+      }
+    } catch {
+      setSavedResumes([]);
+    } finally {
+      setLoadingResumes(false);
+    }
+  }
 
   function handleFile(f: File) {
     if (f.type !== "application/pdf") {
@@ -49,21 +76,28 @@ export function ResumeUploader() {
   }
 
   async function analyze() {
-    if (!file || !jd.trim()) return;
+    if (!jd.trim()) return;
 
     try {
-      // Step 1: Upload resume
-      setState({ status: "uploading" });
-      const form = new FormData();
-      form.append("file", file);
-      const uploadRes = await fetch("/api/resumes/upload", { method: "POST", body: form });
-      if (!uploadRes.ok) {
-        const text = await uploadRes.text().catch(() => "");
-        throw new Error(`Upload failed (${uploadRes.status})${text ? `: ${text.slice(0, 120)}` : ""}`);
-      }
-      const { resumeId } = await uploadRes.json();
+      let resumeId: string;
 
-      // Step 2: Analyze against job description
+      if (mode === "upload") {
+        if (!file) return;
+        setState({ status: "uploading" });
+        const form = new FormData();
+        form.append("file", file);
+        const uploadRes = await fetch("/api/resumes/upload", { method: "POST", body: form });
+        if (!uploadRes.ok) {
+          const text = await uploadRes.text().catch(() => "");
+          throw new Error(`Upload failed (${uploadRes.status})${text ? `: ${text.slice(0, 120)}` : ""}`);
+        }
+        const data = await uploadRes.json();
+        resumeId = data.resumeId;
+      } else {
+        if (!selectedResumeId) return;
+        resumeId = selectedResumeId;
+      }
+
       setState({ status: "analyzing" });
       const analysisRes = await fetch("/api/analysis/", {
         method: "POST",
@@ -71,13 +105,13 @@ export function ResumeUploader() {
         body: JSON.stringify({ resumeId, jobDescription: jd }),
       });
       if (!analysisRes.ok) throw new Error(`Analysis failed (${analysisRes.status})`);
-      const data = await analysisRes.json();
+      const result = await analysisRes.json();
 
-      if (data.rawResponse) {
-        throw new Error("The AI returned an unstructured response — check your OpenAI API key.");
+      if (result.rawResponse) {
+        throw new Error("The AI returned an unstructured response — check your Gemini API key.");
       }
 
-      setState({ status: "done", result: data });
+      setState({ status: "done", result });
     } catch (err) {
       setState({
         status: "error",
@@ -94,6 +128,7 @@ export function ResumeUploader() {
   }
 
   const busy = state.status === "uploading" || state.status === "analyzing";
+  const canAnalyze = !busy && jd.trim() !== "" && (mode === "upload" ? !!file : !!selectedResumeId);
 
   if (state.status === "done") {
     return <Results result={state.result} onReset={reset} />;
@@ -104,7 +139,7 @@ export function ResumeUploader() {
       <CardHeader>
         <CardTitle className="font-heading text-2xl tracking-tight">Resume Matcher</CardTitle>
         <CardDescription>
-          Upload your resume and paste a job description — we'll score the fit and tell you exactly what to fix.
+          Score your resume against any job description and see exactly what to fix.
         </CardDescription>
       </CardHeader>
 
@@ -113,56 +148,120 @@ export function ResumeUploader() {
           <LoadingStages stage={state.status} />
         ) : (
           <>
-            {/* Drop zone */}
-            <div>
-              <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-2">
-                Resume (PDF)
-              </p>
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => inputRef.current?.click()}
-                onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={handleDrop}
+            {/* Mode toggle */}
+            <div className="flex rounded-md border border-border overflow-hidden self-start">
+              <button
+                onClick={() => setMode("upload")}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed p-8 cursor-pointer transition-colors",
-                  dragging
-                    ? "border-primary bg-muted"
-                    : file
-                    ? "border-primary/40 bg-muted/30"
-                    : "border-border hover:border-primary/40 hover:bg-muted/40"
+                  "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
+                  mode === "upload"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}
               >
-                <Upload className={cn("size-6", file ? "text-primary/60" : "text-muted-foreground")} />
-                {file ? (
-                  <div className="flex items-center gap-2 text-sm">
-                    <FileText className="size-4 shrink-0 text-muted-foreground" />
-                    <span className="font-medium truncate max-w-xs">{file.name}</span>
+                <Upload className="size-3.5" />
+                Upload new
+              </button>
+              <button
+                onClick={() => setMode("select")}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-l border-border",
+                  mode === "select"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                <History className="size-3.5" />
+                Previous resumes
+              </button>
+            </div>
+
+            {/* Resume input */}
+            {mode === "upload" ? (
+              <div>
+                <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-2">
+                  Resume (PDF)
+                </p>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => inputRef.current?.click()}
+                  onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={handleDrop}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-3 rounded-md border-2 border-dashed p-8 cursor-pointer transition-colors",
+                    dragging
+                      ? "border-primary bg-muted"
+                      : file
+                      ? "border-primary/40 bg-muted/30"
+                      : "border-border hover:border-primary/40 hover:bg-muted/40"
+                  )}
+                >
+                  <Upload className={cn("size-6", file ? "text-primary/60" : "text-muted-foreground")} />
+                  {file ? (
+                    <div className="flex items-center gap-2 text-sm">
+                      <FileText className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="font-medium truncate max-w-xs">{file.name}</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="Remove file"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center">
+                      Drag & drop a PDF here, or{" "}
+                      <span className="text-foreground font-medium">click to browse</span>
+                    </p>
+                  )}
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-2">
+                  Select resume
+                </p>
+                {loadingResumes ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-3">
+                    <Loader2 className="size-4 animate-spin" />
+                    Loading saved resumes…
+                  </div>
+                ) : savedResumes.length === 0 ? (
+                  <div className="rounded-md border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                    No saved resumes yet.{" "}
                     <button
-                      onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Remove file"
+                      className="text-foreground font-medium underline underline-offset-2"
+                      onClick={() => setMode("upload")}
                     >
-                      <X className="size-4" />
+                      Upload one first.
                     </button>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center">
-                    Drag & drop a PDF here, or{" "}
-                    <span className="text-foreground font-medium">click to browse</span>
-                  </p>
+                  <select
+                    value={selectedResumeId}
+                    onChange={(e) => setSelectedResumeId(e.target.value)}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {savedResumes.map((r) => (
+                      <option key={r.resumeId} value={r.resumeId}>
+                        {r.fileName}
+                      </option>
+                    ))}
+                  </select>
                 )}
-                <input
-                  ref={inputRef}
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
-                />
               </div>
-            </div>
+            )}
 
             {/* Job description */}
             <div>
@@ -188,12 +287,7 @@ export function ResumeUploader() {
         )}
 
         {!busy && (
-          <Button
-            onClick={analyze}
-            disabled={!file || !jd.trim()}
-            size="lg"
-            className="w-full"
-          >
+          <Button onClick={analyze} disabled={!canAnalyze} size="lg" className="w-full">
             Analyze Match
           </Button>
         )}
@@ -244,7 +338,6 @@ function Results({ result, onReset }: { result: AnalysisResult; onReset: () => v
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Score hero */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
@@ -262,29 +355,15 @@ function Results({ result, onReset }: { result: AnalysisResult; onReset: () => v
         </CardContent>
       </Card>
 
-      {/* Skills */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <SkillsPanel
-          title="Matching Skills"
-          skills={result.matchingSkills ?? []}
-          variant="match"
-          emptyText="No matching skills found"
-        />
-        <SkillsPanel
-          title="Missing Skills"
-          skills={result.missingSkills ?? []}
-          variant="miss"
-          emptyText="No missing skills identified"
-        />
+        <SkillsPanel title="Matching Skills" skills={result.matchingSkills ?? []} variant="match" emptyText="No matching skills found" />
+        <SkillsPanel title="Missing Skills"  skills={result.missingSkills  ?? []} variant="miss"  emptyText="No missing skills identified" />
       </div>
 
-      {/* Recommendations */}
       {(result.recommendations ?? []).length > 0 && (
         <Card>
           <CardHeader className="pb-3">
-            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
-              Recommendations
-            </p>
+            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Recommendations</p>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             {result.recommendations.map((rec, i) => (
@@ -308,19 +387,14 @@ function Results({ result, onReset }: { result: AnalysisResult; onReset: () => v
 
 // ── Skills panel ───────────────────────────────────────────────────────────────
 
-function SkillsPanel({
-  title, skills, variant, emptyText,
-}: {
+function SkillsPanel({ title, skills, variant, emptyText }: {
   title: string; skills: string[]; variant: "match" | "miss"; emptyText: string;
 }) {
   return (
     <Card>
       <CardHeader className="pb-3">
         <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground flex items-center gap-2">
-          <span className={cn(
-            "inline-block w-1.5 h-1.5 rounded-full",
-            variant === "match" ? "bg-green-500" : "bg-destructive"
-          )} />
+          <span className={cn("inline-block w-1.5 h-1.5 rounded-full", variant === "match" ? "bg-green-500" : "bg-destructive")} />
           {title}
         </p>
       </CardHeader>
@@ -330,15 +404,12 @@ function SkillsPanel({
         ) : (
           <div className="flex flex-wrap gap-2">
             {skills.map((skill) => (
-              <span
-                key={skill}
-                className={cn(
-                  "rounded-sm px-2.5 py-1 text-xs font-medium font-mono",
-                  variant === "match"
-                    ? "bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                    : "bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400"
-                )}
-              >
+              <span key={skill} className={cn(
+                "rounded-sm px-2.5 py-1 text-xs font-medium font-mono",
+                variant === "match"
+                  ? "bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                  : "bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+              )}>
                 {skill}
               </span>
             ))}
@@ -350,9 +421,6 @@ function SkillsPanel({
 }
 
 // ── Score gauge (canvas) ───────────────────────────────────────────────────────
-//
-// Semicircle from 9 o'clock → 12 o'clock → 3 o'clock (clockwise in canvas).
-// Arc math: start=π, end=2π, score fills start + (score/100)*π.
 
 function ScoreGauge({ score }: { score: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -388,7 +456,6 @@ function ScoreGauge({ score }: { score: number }) {
 
       c.clearRect(0, 0, W, H);
 
-      // Background arc
       c.beginPath();
       c.arc(cx, cy, R, START, START + SPAN, false);
       c.strokeStyle = "#E8E1DA";
@@ -396,7 +463,6 @@ function ScoreGauge({ score }: { score: number }) {
       c.lineCap = "butt";
       c.stroke();
 
-      // Score arc
       if (current > 0.5) {
         c.beginPath();
         c.arc(cx, cy, R, START, START + (current / 100) * SPAN, false);
@@ -406,7 +472,6 @@ function ScoreGauge({ score }: { score: number }) {
         c.stroke();
       }
 
-      // Tick marks
       for (let i = 0; i <= 10; i++) {
         const angle = START + (i / 10) * SPAN;
         const isMajor = i % 5 === 0;
@@ -421,14 +486,12 @@ function ScoreGauge({ score }: { score: number }) {
         c.stroke();
       }
 
-      // Score number
       c.font = `bold 30px 'Geist Mono', ui-monospace, monospace`;
       c.fillStyle = "#1E1712";
       c.textAlign = "center";
       c.textBaseline = "alphabetic";
       c.fillText(String(Math.round(current)), cx, cy - 22);
 
-      // "/100" sub-label
       c.font = `11px system-ui, sans-serif`;
       c.fillStyle = "#8A7060";
       c.fillText("/ 100", cx, cy - 8);
