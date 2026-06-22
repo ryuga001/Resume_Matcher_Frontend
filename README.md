@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MatchKit — Frontend
 
-## Getting Started
+Next.js app for uploading resumes and getting AI-powered ATS scores against job descriptions.
 
-First, run the development server:
+## Tech Stack
+
+- **Next.js 16** + **React 19** — framework
+- **TypeScript** — type safety
+- **Tailwind CSS v4** — styling
+- **shadcn/ui** (Radix UI primitives) — component library
+- **React Hook Form** + **Zod** — form validation
+- **Axios** / native `fetch` — API client
+
+## Project Structure
+
+```
+frontend/
+├── app/
+│   ├── (app)/           # Authenticated shell (layout with sidebar/nav)
+│   │   ├── dashboard/   # Overview page
+│   │   ├── resumes/     # Upload & manage resumes
+│   │   ├── analyze/     # Run ATS analysis
+│   │   ├── history/     # Past analyses
+│   │   └── settings/    # Profile & password update
+│   ├── login/
+│   └── register/
+├── components/
+│   ├── ui/              # shadcn button, card, badge, input, skeleton
+│   └── ResumeUploader   # Drag-and-drop PDF uploader
+├── lib/
+│   ├── api.ts           # Typed API client (auth, resumes, analysis)
+│   ├── auth.tsx         # Auth context + localStorage helpers
+│   ├── toast.tsx        # Toast notification context
+│   └── utils.ts         # cn() and misc helpers
+└── middleware.ts         # Route protection (redirect to /login if no token)
+```
+
+## Setup
+
+**Prerequisites:** Node.js 20+, backend running at `http://localhost:8000`
+
+```bash
+cd frontend
+npm install
+```
+
+Create `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App runs at `http://localhost:3000`. The Next.js config proxies `/api/*` requests to the Django backend.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key Flows
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Authentication
+Token is stored in `localStorage` (`rm_token`). The `middleware.ts` file protects all `/(app)/*` routes — unauthenticated users are redirected to `/login`. A 401 response from any API call clears the token and redirects to `/login`.
 
-## Learn More
+### Resume Upload
+PDFs are uploaded via `POST /api/resumes/upload`. The backend processes them asynchronously; the frontend polls `indexStatus` and shows an "Indexing…" badge until the status is `ready`.
 
-To learn more about Next.js, take a look at the following resources:
+### ATS Analysis
+On the Analyze page, the user selects a ready resume and pastes a job description (min 50 chars). The result includes an ATS score (0–100), matching skills, missing skills, and AI recommendations. Results are saved to history automatically.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev      # Development server with HMR
+npm run build    # Production build
+npm run start    # Serve production build
+npm run lint     # ESLint
+```
