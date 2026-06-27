@@ -113,12 +113,15 @@ export default function ResumesPage() {
         </div>
         {!loading && resumes.length > 0 && (
           <Button size="sm" onClick={() => inputRef.current?.click()} disabled={uploading}>
-            <Plus className="size-3.5 mr-1.5" /> Upload PDF
+            <Plus className="size-3.5 mr-1.5" /> Add
           </Button>
         )}
       </div>
 
       <div className="page-body">
+        {/* Hidden file input — always mounted so the header "Add" button can trigger it */}
+        <input ref={inputRef} type="file" accept="application/pdf" className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); if (inputRef.current) inputRef.current.value = ""; }} />
         {/* Upload zone — always shown when library empty or file selected */}
         {(resumes.length === 0 || selectedFile) && (
           <div className="flex flex-col gap-3">
@@ -152,8 +155,6 @@ export default function ResumesPage() {
                 </p>
               )}
             </div>
-            <input ref={inputRef} type="file" accept="application/pdf" className="hidden"
-              onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
             {selectedFile && (
               <div className="flex gap-2">
                 <Button onClick={handleUpload} disabled={uploading} size="sm">

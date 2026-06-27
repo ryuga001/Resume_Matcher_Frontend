@@ -3,290 +3,388 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { useToast } from "@/lib/toast";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Sparkles, Loader2, FileText, CheckCircle2, ArrowRight, RefreshCw, AlertCircle,
+  FileText, Zap, CheckCircle2, XCircle, Lock, Plus, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Resume = { resumeId: string; fileName: string; indexStatus: "processing" | "ready" | "error"; skills: string[] };
-
-type Result = {
-  atsScore: number;
-  matchingSkills: string[];
-  missingSkills: string[];
-  recommendations: string[];
-  summary: string;
-};
-
-// ── Score gauge ───────────────────────────────────────────────────────────────
+type Resume      = { resumeId: string; fileName: string; uploadedAt: string | null; indexStatus: string; skills: string[] };
+type HistoryItem = { id: string; resumeId: string; resumeName: string; jobDescription: string; atsScore: number; createdAt: string };
+type Result      = { atsScore: number; matchingSkills: string[]; missingSkills: string[]; recommendations: string[]; summary: string };
+type View        = "form" | "loading" | "result";
 
 function ScoreGauge({ score }: { score: number }) {
-  const r = 56, stroke = 11;
-  const circ = Math.PI * r;
-  const offset = circ * (1 - score / 100);
-  const color = score >= 70 ? "oklch(0.52 0.17 145)" : score >= 50 ? "oklch(0.62 0.17 65)" : "oklch(0.577 0.245 27.325)";
-  const label = score >= 85 ? "Strong match" : score >= 70 ? "Good match" : score >= 50 ? "Partial match" : score >= 30 ? "Weak match" : "Poor match";
+  const r            = 80;
+  const circumference = 2 * Math.PI * r;
+  const dashOffset   = circumference * (1 - score / 100);
+  const color        = score >= 70 ? "#2d8a4e" : score >= 50 ? "#c2652a" : "#b3261e";
+  const label        = score >= 70 ? "Good match" : score >= 50 ? "Partial match" : "Weak match";
 
   return (
-    <div className="flex flex-col items-center sm:items-start sm:flex-row gap-5">
-      <svg width="148" height="84" viewBox="0 0 148 84" className="shrink-0">
-        <path d="M 10 74 A 64 64 0 0 1 138 74" fill="none" stroke="currentColor" strokeOpacity="0.1" strokeWidth={stroke} strokeLinecap="round" />
-        <path
-          d="M 10 74 A 64 64 0 0 1 138 74" fill="none"
-          stroke={color} strokeWidth={stroke} strokeLinecap="round"
-          strokeDasharray={`${circ} ${circ}`}
-          strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)" }}
-        />
-        <text x="74" y="66" textAnchor="middle" fontSize="24" fontWeight="700" fontFamily="var(--font-heading,serif)" fill="currentColor">{score}</text>
-        <text x="74" y="79" textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.4">/ 100</text>
-      </svg>
-      <div className="text-center sm:text-left pt-1">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">ATS Score</p>
-        <h2 className="font-heading text-2xl font-bold tracking-tight">{label}</h2>
+    <div className="flex flex-col items-center gap-3">
+      <div className="relative w-[200px] h-[200px]">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r={r} fill="none" stroke="#ece6dc" strokeWidth="12" />
+          <circle
+            cx="100" cy="100" r={r} fill="none"
+            stroke={color} strokeWidth="12"
+            strokeDasharray={circumference} strokeDashoffset={dashOffset}
+            strokeLinecap="round" transform="rotate(-90 100 100)"
+            style={{ transition: "stroke-dashoffset 1s ease-out" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="font-heading text-5xl font-bold" style={{ color }}>{score}</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#9e8e84" }}>Score</span>
+        </div>
       </div>
+      <h3 className="font-heading text-3xl font-bold" style={{ color: "#2a2826" }}>{label}</h3>
     </div>
   );
 }
 
-// ── Result view ───────────────────────────────────────────────────────────────
+function LoadingView({ progress }: { progress: number }) {
+  return (
+    <div className="flex-1 flex items-center justify-center px-8 py-20 min-h-[80vh]">
+      <style>{`
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        @keyframes pulse-glow { 0%,100%{opacity:.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.06)} }
+        @keyframes icon-pulse { 0%,100%{opacity:.8} 50%{opacity:1} }
+      `}</style>
+      <div
+        className="w-full max-w-xl rounded-[32px] p-16 flex flex-col items-center text-center"
+        style={{ background: "#ffffff", boxShadow: "0 4px 32px rgba(58,48,42,0.07)" }}
+      >
+        <div className="relative mb-12">
+          <div className="absolute inset-0 rounded-full" style={{
+            background: "rgba(194,101,42,0.12)", filter: "blur(24px)",
+            animation: "pulse-glow 3s ease-in-out infinite",
+          }} />
+          <div className="relative w-28 h-28 rounded-full border-2 flex items-center justify-center bg-white"
+            style={{ borderColor: "rgba(194,101,42,0.2)", boxShadow: "0 4px 24px rgba(194,101,42,0.08)" }}>
+            <Zap className="size-12" style={{ color: "#c2652a", animation: "icon-pulse 2s ease-in-out infinite" }} strokeWidth={1.5} />
+          </div>
+        </div>
+
+        <h2 className="font-heading text-4xl font-bold mb-3" style={{ color: "#2a2826" }}>
+          Scoring your resume...
+        </h2>
+        <p className="text-base mb-12" style={{ color: "#6e6862" }}>
+          The AI is comparing your experience against the job description.
+        </p>
+
+        <div className="w-full max-w-sm">
+          <div className="flex justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#c2652a" }}>Analysis Progress</span>
+            <span className="text-[10px] font-bold" style={{ color: "#9e8e84" }}>{progress}%</span>
+          </div>
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#ece6dc" }}>
+            <div style={{
+              height: "100%", width: `${progress}%`, borderRadius: "9999px",
+              background: "linear-gradient(90deg,#c2652a 0%,#e08850 50%,#c2652a 100%)",
+              backgroundSize: "200% 100%", animation: "shimmer 2s linear infinite",
+              transition: "width 0.5s ease-out",
+            }} />
+          </div>
+        </div>
+
+        <div className="mt-12 grid grid-cols-2 gap-8 w-full max-w-sm pt-8 border-t" style={{ borderColor: "rgba(212,200,192,0.4)" }}>
+          <div className="text-left">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] mb-1" style={{ color: "#9e8e84" }}>Processing</p>
+            <p className="text-sm font-medium" style={{ color: "#2a2826" }}>Semantic Mapping</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] mb-1" style={{ color: "#9e8e84" }}>Match Index</p>
+            <p className="text-sm font-medium" style={{ color: "#2a2826" }}>Calculating Weights</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ResultView({ result, onReset }: { result: Result; onReset: () => void }) {
-  const score = Math.max(0, Math.min(100, Math.round(result.atsScore)));
-
   return (
-    <div className="flex flex-col gap-4 fade-up">
-      {/* Hero score card */}
-      <div className="bg-card border border-border rounded-lg p-6">
-        <ScoreGauge score={score} />
-        {result.summary && (
-          <p className="text-sm text-muted-foreground leading-relaxed mt-4 sm:ml-[calc(148px+1.25rem)]">
-            {result.summary}
-          </p>
-        )}
-      </div>
+    <div className="px-10 py-10">
+      <div className="max-w-5xl mx-auto">
+        <button onClick={onReset} className="flex items-center gap-1.5 text-sm font-semibold mb-8 hover:underline" style={{ color: "#c2652a" }}>
+          ← New Analysis
+        </button>
 
-      {/* Skills grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {[
-          { title: "Matching skills", skills: result.matchingSkills, variant: "match" as const },
-          { title: "Missing skills",  skills: result.missingSkills,  variant: "miss"  as const },
-        ].map(({ title, skills, variant }) => (
-          <div key={title} className="bg-card border border-border rounded-lg p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <span className={cn("size-2 rounded-full shrink-0", variant === "match" ? "bg-[oklch(0.52_0.17_145)]" : "bg-destructive")} />
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{title}</p>
-              <span className="text-xs text-muted-foreground ml-auto">{skills.length}</span>
-            </div>
-            {skills.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">None identified</p>
-            ) : (
-              <div className="flex flex-wrap gap-1.5">
-                {skills.map(s => (
-                  <span key={s} className={cn(
-                    "text-xs font-mono px-2 py-0.5 rounded font-medium",
-                    variant === "match"
-                      ? "bg-[oklch(0.52_0.17_145/0.10)] text-[oklch(0.38_0.16_145)]"
-                      : "bg-destructive/8 text-destructive"
-                  )}>{s}</span>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Recommendations */}
-      {result.recommendations.length > 0 && (
-        <div className="bg-card border border-border rounded-lg p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Recommendations</p>
-          <ol className="flex flex-col gap-3">
-            {result.recommendations.map((r, i) => (
-              <li key={i} className="flex gap-3 text-sm">
-                <span className="font-mono text-[10px] font-bold text-muted-foreground/60 shrink-0 w-5 mt-0.5 text-right">{String(i+1).padStart(2,"0")}</span>
-                <span className="border-l-2 border-border pl-3 leading-relaxed">{r}</span>
-              </li>
-            ))}
-          </ol>
+        <div className="mb-8">
+          <h2 className="font-heading text-5xl font-bold" style={{ color: "#2a2826" }}>Analysis result</h2>
+          <div className="h-1 w-16 mt-2 rounded-full" style={{ background: "rgba(194,101,42,0.3)" }} />
         </div>
-      )}
 
-      <div className="flex items-center gap-3 pt-1">
-        <Button variant="outline" size="sm" onClick={onReset} className="flex items-center gap-1.5">
-          <RefreshCw className="size-3.5" /> Analyze another
-        </Button>
-        <Link href="/history" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-          View history <ArrowRight className="size-3" />
-        </Link>
+        {/* Score hero */}
+        <div className="bg-white rounded-xl p-10 mb-6 flex flex-col md:flex-row items-center gap-10 border"
+          style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "0 2px 16px rgba(58,48,42,0.04)" }}>
+          <ScoreGauge score={result.atsScore} />
+          <div className="flex-1">
+            <p className="text-base leading-relaxed mb-6" style={{ color: "#6e6862", maxWidth: "560px" }}>
+              {result.summary || "Your profile has been compared against the job description. Review the skill breakdown and recommendations below to improve your match score."}
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              <button className="h-10 px-6 rounded-lg text-white text-sm font-bold hover:opacity-90 transition-all active:scale-[0.97]" style={{ background: "#c2652a" }}>
+                Full Report
+              </button>
+              <button className="h-10 px-6 rounded-lg text-sm font-bold border hover:bg-stone-50 transition-colors" style={{ borderColor: "#e4dcd6", color: "#2a2826" }}>
+                Share Result
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Skills */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white rounded-xl p-8 border" style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "0 2px 16px rgba(58,48,42,0.04)" }}>
+            <div className="flex items-center gap-3 mb-6">
+              <CheckCircle2 className="size-5" style={{ color: "#2e7d32" }} />
+              <h4 className="font-heading text-2xl font-bold" style={{ color: "#2a2826" }}>Matching Skills</h4>
+            </div>
+            {result.matchingSkills.length === 0
+              ? <p className="text-sm" style={{ color: "#9e8e84" }}>No matching skills found.</p>
+              : <div className="flex flex-wrap gap-2">
+                  {result.matchingSkills.map(s => (
+                    <span key={s} className="px-4 py-1.5 rounded-full text-xs font-bold" style={{ background: "#e8f5e9", color: "#2e7d32" }}>{s}</span>
+                  ))}
+                </div>
+            }
+          </div>
+          <div className="bg-white rounded-xl p-8 border" style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "0 2px 16px rgba(58,48,42,0.04)" }}>
+            <div className="flex items-center gap-3 mb-6">
+              <XCircle className="size-5" style={{ color: "#8c3c3c" }} />
+              <h4 className="font-heading text-2xl font-bold" style={{ color: "#2a2826" }}>Missing Skills</h4>
+            </div>
+            {result.missingSkills.length === 0
+              ? <p className="text-sm" style={{ color: "#9e8e84" }}>No missing skills — great match!</p>
+              : <div className="flex flex-wrap gap-2">
+                  {result.missingSkills.map(s => (
+                    <span key={s} className="px-4 py-1.5 rounded-full text-xs font-bold" style={{ background: "#fce4e0", color: "#8c3c3c" }}>{s}</span>
+                  ))}
+                </div>
+            }
+          </div>
+        </div>
+
+        {/* Recommendations */}
+        <div className="bg-white rounded-xl p-10 border" style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "0 2px 16px rgba(58,48,42,0.04)" }}>
+          <h4 className="font-heading text-3xl font-bold mb-8" style={{ color: "#2a2826" }}>Recommendations</h4>
+          <div className="space-y-6">
+            {result.recommendations.map((rec, i) => (
+              <div key={i} className="flex gap-5">
+                <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: "#fbe8d8", color: "#c2652a" }}>
+                  {i + 1}
+                </span>
+                <div className={cn("flex-1 pb-6", i < result.recommendations.length - 1 && "border-b")} style={{ borderColor: "rgba(212,200,192,0.4)" }}>
+                  <p className="text-sm leading-relaxed" style={{ color: "#4a3728" }}>{rec}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 p-5 rounded-xl flex items-center justify-between gap-4" style={{ background: "#f2ece4" }}>
+            <div className="flex items-center gap-4">
+              <div className="size-11 rounded-xl flex items-center justify-center bg-white border shrink-0" style={{ borderColor: "#e4dcd6" }}>
+                <Zap className="size-5" style={{ color: "#c2652a" }} strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-sm font-bold" style={{ color: "#2a2826" }}>Ready to optimize?</p>
+                <p className="text-xs" style={{ color: "#6e6862" }}>Our AI can automatically rewrite these sections for you.</p>
+              </div>
+            </div>
+            <button className="shrink-0 h-10 px-5 rounded-lg text-sm font-bold text-white hover:opacity-90 transition-all" style={{ background: "#2a2826" }}>
+              Auto-Optimize Resume
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-
+/* ── Main Page ────────────────────────────────────────────── */
 export default function AnalyzePage() {
-  const { toast } = useToast();
-  const [resumes, setResumes] = useState<Resume[]>([]);
-  const [loadingResumes, setLoadingResumes] = useState(true);
-  const [selectedId, setSelectedId] = useState("");
-  const [jd, setJd] = useState("");
-  const [analyzing, setAnalyzing] = useState(false);
-  const [result, setResult] = useState<Result | null>(null);
-  const [error, setError] = useState("");
+  const [resumes, setResumes]         = useState<Resume[]>([]);
+  const [history, setHistory]         = useState<HistoryItem[]>([]);
+  const [selectedId, setSelectedId]   = useState<string | null>(null);
+  const [jd, setJd]                   = useState("");
+  const [view, setView]               = useState<View>("form");
+  const [progress, setProgress]       = useState(0);
+  const [result, setResult]           = useState<Result | null>(null);
+  const [error, setError]             = useState("");
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    api.resumes.list()
-      .then(d => { setResumes(d); if (d.length) setSelectedId(d[0].resumeId); })
+    Promise.all([api.resumes.list(), api.analysis.history()])
+      .then(([r, h]) => {
+        setResumes(r);
+        if (r.length > 0) setSelectedId(r[0].resumeId);
+        setHistory(h);
+      })
       .catch(() => {})
-      .finally(() => setLoadingResumes(false));
+      .finally(() => setLoadingData(false));
   }, []);
 
-  const selected = resumes.find(r => r.resumeId === selectedId);
-  const canAnalyze = !analyzing && selectedId && jd.trim().length >= 50 && selected?.indexStatus === "ready";
-
-  async function run() {
-    if (!canAnalyze) return;
-    setError(""); setAnalyzing(true);
+  async function handleSubmit() {
+    if (!selectedId || !jd.trim()) return;
+    setError("");
+    setView("loading");
+    setProgress(18);
+    const ticker = setInterval(() => {
+      setProgress(p => p < 88 ? p + Math.floor(Math.random() * 8) + 3 : p);
+    }, 650);
     try {
       const data = await api.analysis.run(selectedId, jd);
-      if ("rawResponse" in data) throw new Error("AI returned an unstructured response. Check your API key.");
-      setResult(data);
+      clearInterval(ticker);
+      setProgress(100);
+      setTimeout(() => { setResult(data); setView("result"); }, 400);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Analysis failed.";
-      setError(msg); toast(msg, "error");
-    } finally {
-      setAnalyzing(false);
+      clearInterval(ticker);
+      setError(err instanceof Error ? err.message : "Analysis failed.");
+      setView("form");
     }
   }
 
-  function reset() { setResult(null); setError(""); setJd(""); }
+  function scoreLabel(s: number) {
+    if (s >= 70) return { bg: "#e8f5e9", color: "#2e7d32" };
+    if (s >= 50) return { bg: "#fff3e0", color: "#e65100" };
+    return { bg: "#fce4e0", color: "#8c3c3c" };
+  }
 
-  if (result) return (
-    <div>
-      <div className="page-header"><h1 className="font-heading text-xl font-semibold tracking-tight">Analysis result</h1></div>
-      <div className="page-body"><ResultView result={result} onReset={reset} /></div>
-    </div>
-  );
+  if (view === "loading") return <LoadingView progress={progress} />;
+  if (view === "result" && result) return <ResultView result={result} onReset={() => { setView("form"); setResult(null); setJd(""); }} />;
 
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="font-heading text-xl font-semibold tracking-tight">Analyze a match</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Select a resume, paste a job description, and get your ATS score.
-        </p>
-      </div>
+    <div className="px-10 py-10">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <header className="mb-10">
+          <h2 className="font-heading text-4xl font-bold mb-2" style={{ color: "#2a2826" }}>Analyze a match</h2>
+          <p className="text-sm max-w-xl" style={{ color: "#6e6862" }}>
+            Compare your profile with any job description to discover gaps and receive tailored recommendations.
+          </p>
+        </header>
 
-      <div className="page-body max-w-2xl">
-        {analyzing && (
-          <div className="bg-card border border-border rounded-lg py-14 flex flex-col items-center gap-4 text-center fade-up">
-            <div className="relative">
-              <div className="size-14 rounded-full border-2 border-muted flex items-center justify-center">
-                <Sparkles className="size-6 text-muted-foreground/50" />
-              </div>
-              <Loader2 className="size-14 absolute inset-0 animate-spin text-primary/20" />
-            </div>
-            <div>
-              <p className="font-semibold text-sm">Scoring your resume…</p>
-              <p className="text-xs text-muted-foreground mt-1">The AI is comparing your experience against the job description.</p>
-            </div>
-          </div>
+        {error && (
+          <div className="mb-6 px-4 py-3 rounded-xl text-sm" style={{ background: "#fce4e0", color: "#8c3c3c" }}>{error}</div>
         )}
 
-        {!analyzing && (
-          <>
-            {/* Resume selector */}
-            <div>
-              <p className="section-label">Select resume</p>
-              {loadingResumes ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-12 w-full rounded-lg" />
-                  <Skeleton className="h-12 w-full rounded-lg" />
-                </div>
+        {/* Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          {/* Step 1 */}
+          <div className="flex flex-col bg-white border p-8 rounded-xl" style={{ borderColor: "#e4dcd6", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#9e8e84" }}>Step 1: Select Resume</span>
+              <Link href="/resumes" className="text-xs font-bold hover:underline flex items-center gap-1" style={{ color: "#c2652a" }}>
+                <Plus className="size-3" strokeWidth={2.5} /> Upload New
+              </Link>
+            </div>
+            <div className="flex-1 flex flex-col gap-3">
+              {loadingData ? (
+                [1, 2].map(i => <div key={i} className="h-20 rounded-xl animate-pulse" style={{ background: "#f0e8e2" }} />)
               ) : resumes.length === 0 ? (
-                <div className="flex items-start gap-3 bg-muted/30 border border-border rounded-lg p-4 text-sm">
-                  <AlertCircle className="size-4 text-muted-foreground shrink-0 mt-0.5" />
-                  <span className="text-muted-foreground">
-                    No resumes yet.{" "}
-                    <Link href="/resumes" className="text-foreground font-semibold underline underline-offset-2">Upload one first.</Link>
-                  </span>
+                <div className="flex-1 flex flex-col items-center justify-center py-10 gap-3 text-center">
+                  <FileText className="size-8" style={{ color: "#c2652a", opacity: 0.4 }} strokeWidth={1} />
+                  <p className="text-sm font-medium" style={{ color: "#6e6862" }}>No resumes yet</p>
+                  <Link href="/resumes" className="text-xs font-bold hover:underline" style={{ color: "#c2652a" }}>Upload your first resume</Link>
                 </div>
               ) : (
-                <div className="bg-card border border-border rounded-lg divide-y divide-border overflow-hidden">
-                  {resumes.map(r => {
-                    const isSelected = selectedId === r.resumeId;
-                    const isReady = r.indexStatus === "ready";
-                    return (
-                      <label
-                        key={r.resumeId}
-                        className={cn(
-                          "flex items-center gap-3 px-4 py-3 transition-colors",
-                          isReady ? "cursor-pointer" : "cursor-not-allowed opacity-60",
-                          isSelected && isReady ? "bg-muted/40" : isReady ? "hover:bg-muted/20" : ""
-                        )}
-                      >
-                        <input
-                          type="radio" name="resume" value={r.resumeId}
-                          checked={isSelected}
-                          disabled={!isReady}
-                          onChange={() => setSelectedId(r.resumeId)}
-                          className="accent-primary shrink-0"
-                        />
-                        <FileText className="size-4 text-muted-foreground shrink-0" />
-                        <span className="text-sm font-medium flex-1 truncate">{r.fileName}</span>
-                        {r.indexStatus === "processing" && (
-                          <Badge variant="warning" className="gap-1 shrink-0">
-                            <Loader2 className="size-2.5 animate-spin" />Indexing…
-                          </Badge>
-                        )}
-                        {r.indexStatus === "ready" && isSelected && (
-                          <CheckCircle2 className="size-4 text-[oklch(0.52_0.17_145)] shrink-0" />
-                        )}
-                        {r.indexStatus === "error" && (
-                          <Badge variant="error" className="shrink-0">Error</Badge>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
+                resumes.map(r => {
+                  const active = selectedId === r.resumeId;
+                  return (
+                    <button
+                      key={r.resumeId}
+                      onClick={() => setSelectedId(r.resumeId)}
+                      className="text-left p-5 rounded-xl border-2 cursor-pointer relative transition-all"
+                      style={{ borderColor: active ? "#c2652a" : "#e4dcd6", background: active ? "rgba(194,101,42,0.04)" : "#fff" }}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-12 rounded-lg flex items-center justify-center shrink-0" style={{ background: active ? "rgba(194,101,42,0.10)" : "#f0e8e2" }}>
+                          <FileText className="size-5" style={{ color: active ? "#c2652a" : "#9e8e84" }} strokeWidth={1.5} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold truncate" style={{ color: "#2a2826" }}>{r.fileName}</p>
+                          <p className="text-xs mt-0.5" style={{ color: "#9e8e84" }}>
+                            {r.uploadedAt ? new Date(r.uploadedAt).toLocaleDateString() : "Recently uploaded"}
+                          </p>
+                        </div>
+                      </div>
+                      {active && <CheckCircle2 className="absolute top-4 right-4 size-5" style={{ color: "#c2652a" }} />}
+                    </button>
+                  );
+                })
               )}
             </div>
+          </div>
 
-            {/* Job description */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="section-label">Job description</p>
-                <span className="text-xs text-muted-foreground">{jd.length} chars{jd.length < 50 ? ` (min 50)` : ""}</span>
-              </div>
-              <textarea
-                value={jd}
-                onChange={e => setJd(e.target.value)}
-                placeholder="Paste the full job description here — responsibilities, requirements, preferred qualifications. The more detail, the better the analysis."
-                rows={10}
-                className="w-full rounded-lg border border-input bg-transparent px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y leading-relaxed"
-              />
+          {/* Step 2 */}
+          <div className="flex flex-col bg-white border p-8 rounded-xl" style={{ borderColor: "#e4dcd6", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div className="mb-6">
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#9e8e84" }}>Step 2: Paste Job Description</span>
             </div>
+            <textarea
+              value={jd}
+              onChange={e => setJd(e.target.value)}
+              placeholder="Paste the job requirements or company role description here to begin the intelligence scan..."
+              className="flex-1 w-full p-4 text-sm rounded-xl border resize-none outline-none transition-all"
+              style={{ minHeight: "260px", borderColor: "#e4dcd6", background: "#fdfcfb", color: "#2a2826" }}
+              onFocus={e => { e.currentTarget.style.borderColor = "#c2652a"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(194,101,42,0.10)"; }}
+              onBlur={e => { e.currentTarget.style.borderColor = "#e4dcd6"; e.currentTarget.style.boxShadow = "none"; }}
+            />
+          </div>
+        </div>
 
-            {error && (
-              <div className="flex items-start gap-2 text-sm text-destructive bg-destructive/8 rounded-lg px-3 py-2.5">
-                <AlertCircle className="size-4 shrink-0 mt-0.5" />{error}
-              </div>
-            )}
+        {/* CTA */}
+        <div className="mt-10 flex flex-col items-center gap-3">
+          <button
+            onClick={handleSubmit}
+            disabled={!selectedId || !jd.trim()}
+            className="h-14 px-12 rounded-xl text-white font-bold flex items-center gap-3 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: "#c2652a", boxShadow: "0 4px 20px rgba(194,101,42,0.25)" }}
+          >
+            <Zap className="size-5" strokeWidth={2} />
+            Generate Intelligence Report
+          </button>
+          <p className="text-xs flex items-center gap-1.5" style={{ color: "#9e8e84" }}>
+            <Lock className="size-3" /> Your data is processed securely and privately.
+          </p>
+        </div>
 
-            <div className="flex items-center gap-3">
-              <Button onClick={run} disabled={!canAnalyze} className="flex items-center gap-2">
-                <Sparkles className="size-4" /> Score this match
-              </Button>
-              {jd.length > 0 && jd.length < 50 && (
-                <p className="text-xs text-muted-foreground">Add {50 - jd.length} more characters</p>
-              )}
+        {/* Recent Comparisons */}
+        {history.length > 0 && (
+          <section className="mt-16">
+            <div className="flex items-center justify-between border-b pb-4 mb-6" style={{ borderColor: "#e4dcd6" }}>
+              <h3 className="font-heading text-xl font-semibold" style={{ color: "#2a2826" }}>Recent Comparisons</h3>
+              <Link href="/history" className="text-[10px] font-bold uppercase tracking-[0.12em] hover:underline flex items-center gap-1" style={{ color: "#9e8e84" }}>
+                View All <ChevronRight className="size-3" />
+              </Link>
             </div>
-          </>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {history.slice(0, 3).map(h => {
+                const sl = scoreLabel(h.atsScore);
+                return (
+                  <Link
+                    key={h.id}
+                    href={`/history/${h.id}`}
+                    className="p-5 rounded-xl border transition-colors hover:bg-white"
+                    style={{ background: "rgba(255,255,255,0.6)", borderColor: "#e4dcd6" }}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase" style={{ background: sl.bg, color: sl.color }}>
+                        {h.atsScore}% Match
+                      </span>
+                      <span className="text-[10px]" style={{ color: "#9e8e84" }}>{new Date(h.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-sm font-bold truncate" style={{ color: "#2a2826" }}>{h.resumeName}</p>
+                    <p className="text-xs mt-1 truncate" style={{ color: "#9e8e84" }}>
+                      {h.jobDescription?.substring(0, 60)}…
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
         )}
       </div>
     </div>

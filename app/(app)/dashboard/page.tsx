@@ -4,172 +4,293 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { FileText, Sparkles, TrendingUp, ArrowRight, Clock, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Search, Plus, FileText, BarChart2, RefreshCw, Lightbulb } from "lucide-react";
 
+type Resume      = { resumeId: string; fileName: string; uploadedAt: string | null; indexStatus: string; skills: string[] };
 type HistoryItem = { id: string; resumeName: string; atsScore: number; createdAt: string };
 
-function scoreVariant(s: number): "success" | "warning" | "error" {
-  return s >= 70 ? "success" : s >= 50 ? "warning" : "error";
-}
-function scoreLabel(s: number) {
-  if (s >= 85) return "Strong"; if (s >= 70) return "Good";
-  if (s >= 50) return "Partial"; if (s >= 30) return "Weak"; return "Poor";
-}
-
-function StatCard({ label, value, unit, icon: Icon, href, cta, loading }: {
-  label: string; value: string; unit?: string; icon: React.ElementType;
-  href: string; cta: string; loading: boolean;
-}) {
-  return (
-    <Link href={href} className="block group">
-      <div className="bg-card border border-border rounded-lg p-5 h-full hover:border-primary/30 transition-colors">
-        <div className="flex items-start justify-between mb-4">
-          <p className="section-label">{label}</p>
-          <Icon className="size-4 text-muted-foreground/40" />
-        </div>
-        {loading ? (
-          <Skeleton className="h-8 w-16 mb-3" />
-        ) : (
-          <div className="flex items-baseline gap-1.5 mb-3">
-            <span className="font-heading text-3xl font-bold tracking-tight">{value}</span>
-            {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
-          </div>
-        )}
-        <span className="text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-colors inline-flex items-center gap-1">
-          {cta} <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
-        </span>
-      </div>
-    </Link>
-  );
+function scoreStatusLabel(s: number) {
+  if (s >= 70) return "Good Match";
+  if (s >= 50) return "Needs Optimization";
+  if (s >= 30) return "Weak Match";
+  return "Critical Needs";
 }
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [resumeCount, setResumeCount] = useState<number | null>(null);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [resumes, setResumes]   = useState<Resume[]>([]);
+  const [history, setHistory]   = useState<HistoryItem[]>([]);
+  const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
     Promise.all([api.resumes.list(), api.analysis.history()])
-      .then(([r, h]) => { setResumeCount(r.length); setHistory(h); })
-      .catch(() => { setResumeCount(0); })
+      .then(([r, h]) => { setResumes(r); setHistory(h); })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const recent = history.slice(0, 5);
-  const avg = history.length ? Math.round(history.reduce((s, h) => s + (h.atsScore ?? 0), 0) / history.length) : null;
+  const avg = history.length
+    ? Math.round(history.reduce((s, h) => s + (h.atsScore ?? 0), 0) / history.length)
+    : null;
+
+  const recent = resumes.slice(0, 5);
 
   return (
-    <div>
-      {/* Header */}
-      <div className="page-header">
-        <h1 className="font-heading text-xl font-semibold tracking-tight">
-          Good to see you, {user?.name.split(" ")[0]}.
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Your resume intelligence at a glance.</p>
-      </div>
-
-      <div className="page-body">
-        {/* Stat strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <StatCard label="Resumes" value={loading ? "—" : String(resumeCount ?? 0)} icon={FileText} href="/resumes" cta="Manage library" loading={loading} />
-          <StatCard label="Analyses run" value={loading ? "—" : String(history.length)} icon={Sparkles} href="/history" cta="View history" loading={loading} />
-          <StatCard label="Avg. ATS score" value={loading ? "—" : avg !== null ? String(avg) : "—"} unit={avg !== null ? "/ 100" : undefined} icon={TrendingUp} href="/analyze" cta="Run analysis" loading={loading} />
-        </div>
-
-        {/* Quick actions */}
+    <div className="min-h-screen flex flex-col" style={{ background: "#f5ede4" }}>
+      {/* ── Top bar ───────────────────────────────────────── */}
+      <div className="px-8 pt-8 pb-6 flex items-start justify-between gap-4">
         <div>
-          <p className="section-label">Get started</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[
-              { href: "/resumes", icon: Plus, title: "Upload a resume", desc: "Add a PDF to your library" },
-              { href: "/analyze", icon: Sparkles, title: "Score a match", desc: "Paste a job description and get your ATS score in 30 seconds" },
-            ].map(({ href, icon: Icon, title, desc }) => (
-              <Link key={href} href={href} className="group flex items-center gap-4 bg-card border border-border rounded-lg p-4 hover:border-primary/30 transition-colors">
-                <div className="size-9 rounded-md bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/8 transition-colors">
-                  <Icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold">{title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{desc}</p>
-                </div>
-                <ArrowRight className="size-4 text-muted-foreground ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </Link>
-            ))}
+          <h1 className="font-heading text-4xl font-bold leading-tight" style={{ color: "#2a2826" }}>
+            Good to see you, {user?.name.split(" ")[0]}.
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "#6e6862" }}>
+            Your career intelligence is updating in real-time.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0 mt-1">
+          <button
+            className="h-10 px-4 flex items-center gap-2 rounded-full border text-sm font-medium transition-colors hover:bg-white/60"
+            style={{ borderColor: "#d4c4b8", color: "#6e6862", background: "rgba(255,255,255,0.5)" }}
+          >
+            <Search className="size-4" />
+            Search Intelligence
+          </button>
+          <Link
+            href="/resumes"
+            className="h-10 px-5 flex items-center gap-2 rounded-full text-white text-sm font-bold transition-all hover:opacity-90 active:scale-[0.97]"
+            style={{ background: "#c2652a" }}
+          >
+            <Plus className="size-4" strokeWidth={2.5} />
+            New Resume
+          </Link>
+        </div>
+      </div>
+
+      <div className="flex-1 px-8 pb-10 flex flex-col gap-6">
+        {/* ── Stat cards ──────────────────────────────────── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Active Docs */}
+          <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="size-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(194,101,42,0.10)" }}>
+                <FileText className="size-5" style={{ color: "#c2652a" }} strokeWidth={1.5} />
+              </div>
+              <span className="text-[9px] font-bold uppercase tracking-[0.14em]" style={{ color: "#9e8e84" }}>Active Docs</span>
+            </div>
+            {loading ? (
+              <div className="h-10 w-10 rounded-lg animate-pulse" style={{ background: "#f0e8e2" }} />
+            ) : (
+              <p className="font-heading text-5xl font-bold" style={{ color: "#2a2826" }}>
+                {resumes.length}
+              </p>
+            )}
+            <p className="text-xs mt-2" style={{ color: "#9e8e84" }}>Resumes stored and analyzed</p>
+          </div>
+
+          {/* Deep Scans */}
+          <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="size-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(194,101,42,0.10)" }}>
+                <BarChart2 className="size-5" style={{ color: "#c2652a" }} strokeWidth={1.5} />
+              </div>
+              <span className="text-[9px] font-bold uppercase tracking-[0.14em]" style={{ color: "#9e8e84" }}>Deep Scans</span>
+            </div>
+            {loading ? (
+              <div className="h-10 w-10 rounded-lg animate-pulse" style={{ background: "#f0e8e2" }} />
+            ) : (
+              <p className="font-heading text-5xl font-bold" style={{ color: "#2a2826" }}>
+                {history.length}
+              </p>
+            )}
+            <p className="text-xs mt-2" style={{ color: "#9e8e84" }}>Analyses run this month</p>
+          </div>
+
+          {/* Strength Index */}
+          <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="size-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(194,101,42,0.10)" }}>
+                <RefreshCw className="size-5" style={{ color: "#c2652a" }} strokeWidth={1.5} />
+              </div>
+              <span className="text-[9px] font-bold uppercase tracking-[0.14em]" style={{ color: "#9e8e84" }}>Strength Index</span>
+            </div>
+            {loading ? (
+              <div className="h-10 w-20 rounded-lg animate-pulse" style={{ background: "#f0e8e2" }} />
+            ) : (
+              <div className="flex items-baseline gap-1">
+                <p className="font-heading text-5xl font-bold" style={{ color: "#2a2826" }}>
+                  {avg ?? "—"}
+                </p>
+                {avg !== null && <span className="text-base font-medium" style={{ color: "#9e8e84" }}>/100</span>}
+              </div>
+            )}
+            <p className="text-xs mt-1" style={{ color: "#9e8e84" }}>
+              Avg ATS Score{avg !== null ? ` (${scoreStatusLabel(avg)})` : ""}
+            </p>
+            {avg !== null && (
+              <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: "#f0e8e2" }}>
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{ width: `${avg}%`, background: avg >= 70 ? "#2d8a4e" : avg >= 50 ? "#c2652a" : "#b3261e" }}
+                />
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Recent analyses */}
-        {loading ? (
-          <div>
-            <p className="section-label">Recent analyses</p>
-            <div className="bg-card border border-border rounded-lg divide-y divide-border">
-              {[1,2,3].map(i => (
-                <div key={i} className="flex items-center gap-4 px-5 py-4">
-                  <Skeleton className="h-10 w-14 rounded-md shrink-0" />
-                  <div className="flex-1"><Skeleton className="h-4 w-40 mb-2" /><Skeleton className="h-3 w-24" /></div>
+        {/* ── Bottom grid ─────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
+          {/* Recent Resumes table */}
+          <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-heading text-lg font-bold" style={{ color: "#2a2826" }}>Recent Resumes</h2>
+              <Link href="/resumes" className="text-sm font-semibold hover:underline" style={{ color: "#c2652a" }}>
+                View All Library
+              </Link>
+            </div>
+
+            {/* Table header */}
+            <div className="grid grid-cols-[1fr_160px_80px_120px] gap-2 px-1 mb-3">
+              {["Document Name", "Target Role", "Score", "Status"].map(col => (
+                <span key={col} className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: "#9e8e84" }}>
+                  {col}
+                </span>
+              ))}
+            </div>
+
+            <div className="flex flex-col divide-y" style={{ divideColor: "#f5ede4" }}>
+              {loading ? (
+                [1, 2, 3].map(i => (
+                  <div key={i} className="py-4 grid grid-cols-[1fr_160px_80px_120px] gap-2 items-center">
+                    <div className="h-4 rounded animate-pulse" style={{ background: "#f0e8e2", width: "60%" }} />
+                    <div className="h-4 rounded animate-pulse" style={{ background: "#f0e8e2", width: "80%" }} />
+                    <div className="h-6 w-14 rounded-full animate-pulse" style={{ background: "#f0e8e2" }} />
+                    <div className="h-4 rounded animate-pulse" style={{ background: "#f0e8e2", width: "70%" }} />
+                  </div>
+                ))
+              ) : recent.length === 0 ? (
+                <div className="py-12 text-center">
+                  <p className="text-sm font-medium" style={{ color: "#6e6862" }}>No resumes yet</p>
+                  <Link href="/resumes" className="text-sm font-semibold mt-1 inline-block hover:underline" style={{ color: "#c2652a" }}>
+                    Upload your first resume
+                  </Link>
                 </div>
-              ))}
+              ) : (
+                recent.map(r => {
+                  const matchedHistory = history.find(h => h.resumeName === r.fileName);
+                  const displayScore = matchedHistory?.atsScore ?? null;
+                  const indexReady = r.indexStatus === "ready";
+                  return (
+                    <Link
+                      key={r.resumeId}
+                      href="/resumes"
+                      className="py-4 grid grid-cols-[1fr_160px_80px_120px] gap-2 items-center hover:bg-stone-50 -mx-2 px-2 rounded-lg transition-colors"
+                    >
+                      {/* Name */}
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="size-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "#fef2ea" }}>
+                          <FileText className="size-4" style={{ color: "#c2652a" }} strokeWidth={1.5} />
+                        </div>
+                        <span className="text-sm font-medium truncate" style={{ color: "#2a2826" }}>{r.fileName}</span>
+                      </div>
+                      {/* Role — not in API, show top skill as hint */}
+                      <span className="text-sm truncate" style={{ color: "#6e6862" }}>
+                        {r.skills[0] ?? "—"}
+                      </span>
+                      {/* Score badge */}
+                      {displayScore !== null ? (
+                        <span
+                          className="inline-flex items-center justify-center h-7 px-3 rounded-full text-xs font-bold text-white"
+                          style={{ background: displayScore >= 70 ? "#2d8a4e" : displayScore >= 50 ? "#c2652a" : "#b3261e" }}
+                        >
+                          {displayScore}/100
+                        </span>
+                      ) : (
+                        <span className="text-xs" style={{ color: "#9e8e84" }}>—</span>
+                      )}
+                      {/* Status */}
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="size-1.5 rounded-full shrink-0"
+                          style={{ background: !indexReady ? "#9e8e84" : displayScore !== null ? (displayScore >= 70 ? "#2d8a4e" : "#c2652a") : "#9e8e84" }}
+                        />
+                        <span className="text-xs truncate" style={{ color: "#6e6862", fontStyle: "italic" }}>
+                          {!indexReady
+                            ? "Processing"
+                            : displayScore !== null
+                            ? scoreStatusLabel(displayScore)
+                            : "Not analyzed"}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
             </div>
           </div>
-        ) : recent.length > 0 ? (
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <p className="section-label">Recent analyses</p>
-              <Link href="/history" className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1">
-                All history <ArrowRight className="size-3" />
-              </Link>
-            </div>
-            <div className="bg-card border border-border rounded-lg divide-y divide-border overflow-hidden">
-              {recent.map((h, i) => (
-                <Link
-                  key={h.id}
-                  href={`/history/${h.id}`}
-                  className={cn("flex items-center gap-4 px-5 py-3.5 hover:bg-muted/30 transition-colors group fade-up", i > 0 && `fade-up-delay-${Math.min(i, 3)}`)}
-                >
-                  <div className={cn(
-                    "flex flex-col items-center justify-center rounded-md px-2.5 py-1.5 min-w-[52px] text-center shrink-0",
-                    h.atsScore >= 70 ? "bg-[oklch(0.52_0.17_145/0.1)]" : h.atsScore >= 50 ? "bg-[oklch(0.62_0.17_65/0.1)]" : "bg-destructive/10"
-                  )}>
-                    <span className={cn("font-heading text-lg font-bold leading-none", h.atsScore >= 70 ? "text-[oklch(0.42_0.17_145)]" : h.atsScore >= 50 ? "text-[oklch(0.52_0.17_65)]" : "text-destructive")}>
-                      {h.atsScore}
-                    </span>
-                    <span className="text-[9px] font-semibold uppercase tracking-wide opacity-70 mt-0.5">{scoreLabel(h.atsScore)}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{h.resumeName}</p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                      <Clock className="size-3" />{new Date(h.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <ArrowRight className="size-4 text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
-            <div className="size-14 rounded-full bg-muted flex items-center justify-center">
-              <Sparkles className="size-6 text-muted-foreground/50" />
-            </div>
-            <div>
-              <p className="font-semibold text-sm mb-1">No analyses yet</p>
-              <p className="text-sm text-muted-foreground max-w-xs">
-                Upload a resume, paste a job description, and get your ATS score in under a minute.
+
+          {/* Right column */}
+          <div className="flex flex-col gap-4">
+            {/* Intelligence Insight */}
+            <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+              <div className="size-12 rounded-full flex items-center justify-center mb-4 mx-auto" style={{ background: "rgba(194,101,42,0.10)" }}>
+                <Lightbulb className="size-5" style={{ color: "#c2652a" }} strokeWidth={1.5} />
+              </div>
+              <h3 className="font-heading text-base font-bold text-center mb-3" style={{ color: "#2a2826" }}>
+                Intelligence Insight
+              </h3>
+              <p className="text-sm text-center leading-relaxed italic" style={{ color: "#6e6862" }}>
+                {avg !== null && avg < 60
+                  ? `"Your resume score of ${avg}/100 indicates skill gaps. Run a deep scan to see exact missing keywords."`
+                  : avg !== null
+                  ? `"Your average score of ${avg}/100 is strong. Targeting specific roles can push it higher."`
+                  : `"Upload a resume and run your first analysis to unlock personalized career insights."`
+                }
               </p>
+              <div className="text-center mt-4">
+                <Link href="/analyze" className="text-sm font-bold hover:underline" style={{ color: "#c2652a" }}>
+                  Fix Now
+                </Link>
+              </div>
             </div>
-            <Button asChild size="sm">
-              <Link href={resumeCount ? "/analyze" : "/resumes"}>
-                {resumeCount ? "Run your first analysis" : "Upload your first resume"}
-              </Link>
-            </Button>
+
+            {/* Market Sentiment */}
+            <div className="rounded-2xl p-6" style={{ background: "#2a2826", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}>
+              <h3 className="font-heading text-base font-bold mb-5" style={{ color: "#f0ebe6" }}>
+                Market Sentiment
+              </h3>
+              <div className="flex flex-col gap-5">
+                {[
+                  { label: "Frontend Engineering", value: "High Demand", pct: 82 },
+                  { label: "Salary Benchmark",     value: "+12% Trend",  pct: 55 },
+                ].map(({ label, value, pct }) => (
+                  <div key={label}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: "#9e8e84" }}>{label}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: "#9e8e84" }}>{value}</span>
+                    </div>
+                    <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.10)" }}>
+                      <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "#c2652a" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="px-8 py-6 border-t flex items-center justify-between text-xs" style={{ borderColor: "#e8ddd6", color: "#9e8e84" }}>
+        <div>
+          <span className="font-heading font-semibold text-sm" style={{ color: "#2a2826" }}>Sahara</span>
+          <span className="ml-3">© 2024 Sahara Career Intelligence. All rights reserved.</span>
+        </div>
+        <nav className="flex items-center gap-5">
+          {["Privacy Policy", "Terms of Service", "Contact", "Careers"].map(l => (
+            <Link key={l} href="#" className="hover:text-foreground transition-colors">{l}</Link>
+          ))}
+        </nav>
+      </footer>
     </div>
   );
 }
