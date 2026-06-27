@@ -1,0 +1,91 @@
+"use client";
+
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useResumes } from "@/components/resumes/hooks/useResumes";
+import { UploadZone } from "@/components/resumes/UploadZone";
+import { ResumeLibrary } from "@/components/resumes/ResumeLibrary";
+
+export function ResumesPage() {
+  const {
+    resumes,
+    loading,
+    uploading,
+    dragging,
+    setDragging,
+    selectedFile,
+    setSelectedFile,
+    deleteId,
+    expanded,
+    inputRef,
+    handleFile,
+    handleUpload,
+    handleDelete,
+    toggleExpanded,
+  } = useResumes();
+
+  const showUploadZone = resumes.length === 0 || !!selectedFile;
+
+  return (
+    <div className="px-8 py-8">
+      <header className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-4xl font-bold" style={{ color: "#2a2826" }}>Resumes</h1>
+          <p className="text-sm mt-1" style={{ color: "#6e6862" }}>
+            Your PDF library. Select a resume when running an analysis.
+          </p>
+        </div>
+        {!loading && resumes.length > 0 && (
+          <Button size="sm" onClick={() => inputRef.current?.click()} disabled={uploading} className="mt-2 shrink-0">
+            <Plus className="size-3.5 mr-1.5" /> Add
+          </Button>
+        )}
+      </header>
+
+      <div className="flex flex-col gap-6">
+        <input
+          ref={inputRef}
+          type="file"
+          accept="application/pdf"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleFile(f);
+            if (inputRef.current) inputRef.current.value = "";
+          }}
+        />
+
+        {showUploadZone && (
+          <UploadZone
+            selectedFile={selectedFile}
+            dragging={dragging}
+            uploading={uploading}
+            onTriggerClick={() => inputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              const f = e.dataTransfer.files[0];
+              if (f) handleFile(f);
+            }}
+            onClearFile={() => setSelectedFile(null)}
+            onUpload={handleUpload}
+            onCancel={() => setSelectedFile(null)}
+            showLabel={resumes.length === 0}
+          />
+        )}
+
+        <ResumeLibrary
+          resumes={resumes}
+          loading={loading}
+          expanded={expanded}
+          deleteId={deleteId}
+          onToggle={toggleExpanded}
+          onDelete={handleDelete}
+        />
+      </div>
+    </div>
+  );
+}
+

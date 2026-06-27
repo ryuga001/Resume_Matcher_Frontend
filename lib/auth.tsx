@@ -1,73 +1,29 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setCredentials, clearCredentials } from "@/store/slices/authSlice";
+import type { User } from "@/store/slices/authSlice";
 
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+// Keeps the exact same interface as the original React-context version.
+// All existing components that call useAuth() continue to work unchanged.
+export function useAuth() {
+  const user      = useAppSelector((s) => s.auth.user);
+  const token     = useAppSelector((s) => s.auth.token);
+  const isLoading = useAppSelector((s) => s.auth.isLoading);
+  const dispatch  = useAppDispatch();
+  const router    = useRouter();
 
-interface AuthContextValue {
-  user: User | null;
-  token: string | null;
-  login: (token: string, user: User) => void;
-  logout: () => void;
-  isLoading: boolean;
-}
-
-const AuthContext = createContext<AuthContextValue>({
-  user: null,
-  token: null,
-  login: () => {},
-  logout: () => {},
-  isLoading: true,
-});
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    const stored = localStorage.getItem("rm_token");
-    const storedUser = localStorage.getItem("rm_user");
-    if (stored && storedUser) {
-      try {
-        setToken(stored);
-        setUser(JSON.parse(storedUser));
-      } catch {
-        localStorage.removeItem("rm_token");
-        localStorage.removeItem("rm_user");
-      }
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = useCallback((newToken: string, newUser: User) => {
-    localStorage.setItem("rm_token", newToken);
-    localStorage.setItem("rm_user", JSON.stringify(newUser));
-    document.cookie = `rm_token=${newToken}; path=/; max-age=${60 * 60 * 24 * 7}`;
-    setToken(newToken);
-    setUser(newUser);
-  }, []);
+  const login = useCallback(
+    (token: string, user: User) => dispatch(setCredentials({ token, user })),
+    [dispatch],
+  );
 
   const logout = useCallback(() => {
-    localStorage.removeItem("rm_token");
-    localStorage.removeItem("rm_user");
-    document.cookie = "rm_token=; path=/; max-age=0";
-    setToken(null);
-    setUser(null);
+    dispatch(clearCredentials());
     router.push("/login");
-  }, [router]);
+  }, [dispatch, router]);
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return { user, token, isLoading, login, logout };
 }
-
-export const useAuth = () => useContext(AuthContext);

@@ -7,6 +7,7 @@ import {
   History,
   LayoutDashboard,
   Loader2,
+  LogOut,
   Menu,
   Settings,
   Sparkles,
@@ -85,8 +86,8 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         </button>
       </div>
 
-      {/* User */}
-      <div className="px-4 py-4 border-t shrink-0" style={{ borderColor: "#f0e8e2" }}>
+      {/* User + Sign out */}
+      <div className="px-4 py-3 border-t shrink-0" style={{ borderColor: "#f0e8e2" }}>
         <div className="flex items-center gap-3">
           <div
             className="size-9 rounded-full flex items-center justify-center shrink-0 text-white text-sm font-bold"
@@ -94,10 +95,18 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           >
             {user?.name.charAt(0).toUpperCase()}
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold truncate" style={{ color: "#2a2826" }}>{user?.name}</p>
             <p className="text-[10px]" style={{ color: "#9e8e84" }}>Free Tier</p>
           </div>
+          <button
+            onClick={logout}
+            title="Sign out"
+            className="shrink-0 size-8 flex items-center justify-center rounded-lg transition-colors hover:bg-stone-100"
+            style={{ color: "#9e8e84" }}
+          >
+            <LogOut className="size-4" strokeWidth={1.8} />
+          </button>
         </div>
       </div>
     </div>
@@ -127,9 +136,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#f5ede4" }}>
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-[220px] shrink-0 flex-col border-r" style={{ borderColor: "#ede8e3", background: "#ffffff" }}>
+    <div className="h-screen flex overflow-hidden" style={{ background: "#f5ede4" }}>
+      {/* Desktop sidebar — fixed height, never scrolls */}
+      <aside className="hidden md:flex w-[220px] shrink-0 flex-col border-r h-screen" style={{ borderColor: "#ede8e3", background: "#ffffff" }}>
         <Sidebar />
       </aside>
 
@@ -149,10 +158,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Sidebar onClose={() => setMobileOpen(false)} />
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 min-w-0 overflow-auto">
+      {/* Main — only this column scrolls */}
+      <main className="flex-1 min-w-0 overflow-y-auto">
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center gap-3 px-4 h-14 border-b bg-white shrink-0 sticky top-0 z-30" style={{ borderColor: "#ede8e3" }}>
+        <div className="md:hidden flex items-center gap-3 px-4 h-12 border-b bg-white shrink-0 sticky top-0 z-30" style={{ borderColor: "#ede8e3" }}>
           <button
             onClick={() => setMobileOpen(v => !v)}
             className="transition-colors"
