@@ -106,13 +106,18 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
   const [save,     { isLoading: isSaving }]  = useSaveSubtopicsMutation();
 
   // Poll task status every 2s while taskId is set
-  const { data: taskStatus } = useGetSubtopicsTaskStatusQuery(
+  const { data: taskStatus, isError: isTaskError } = useGetSubtopicsTaskStatusQuery(
     { courseId: course?.id ?? "", taskId: taskId ?? "" },
     { skip: !taskId || !course, pollingInterval: 2000 }
   );
 
   // Handle poll result
   useEffect(() => {
+    if (isTaskError) {
+      setError("Could not reach the server. Please try again.");
+      setTaskId(null);
+      return;
+    }
     if (!taskStatus) return;
     if (taskStatus.status === "done") {
       setSubtopics(taskStatus.subtopics ?? []);
@@ -122,7 +127,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
       setError(taskStatus.error ?? "Generation failed. Please try again.");
       setTaskId(null);
     }
-  }, [taskStatus]);
+  }, [taskStatus, isTaskError]);
 
   const isGenerating = isPosting || !!taskId;
 
