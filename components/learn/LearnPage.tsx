@@ -6,6 +6,7 @@ import { COLORS } from "./constants";
 import { CourseCard } from "./CourseCard";
 import { FilterBar } from "./FilterBar";
 import { UploadModal } from "./UploadModal";
+import { SubtopicsModal } from "./SubtopicsModal";
 import { useLearn } from "./hooks/useLearn";
 
 export function LearnPage() {
@@ -19,6 +20,7 @@ export function LearnPage() {
     statusFilter, setStatusFilter,
     modalOpen, openCreate, openEdit, closeModal,
     editCourse,
+    subtopicsOpen, subtopicsCourse, openSubtopics, closeSubtopics,
     handleDelete,
   } = useLearn();
 
@@ -93,6 +95,7 @@ export function LearnPage() {
               course={course}
               isAdmin={isAdmin}
               onEdit={openEdit}
+              onSubtopics={openSubtopics}
               onDelete={handleDelete}
             />
           ))}
@@ -149,6 +152,13 @@ export function LearnPage() {
         open={modalOpen}
         onClose={closeModal}
         editCourse={editCourse}
+      />
+
+      {/* Subtopics modal */}
+      <SubtopicsModal
+        open={subtopicsOpen}
+        onClose={closeSubtopics}
+        course={subtopicsCourse}
       />
     </div>
   );

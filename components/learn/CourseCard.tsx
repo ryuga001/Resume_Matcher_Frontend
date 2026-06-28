@@ -1,18 +1,84 @@
 "use client";
 
-import { BookOpen, Edit2, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { BookOpen, Edit2, Layers, MoreVertical, Trash2 } from "lucide-react";
 import { COLORS, CARD_STYLE } from "./constants";
 import { truncateCategories } from "./utils";
 import type { Course } from "./types";
 
 type Props = {
-  course: Course;
-  isAdmin: boolean;
-  onEdit: (course: Course) => void;
-  onDelete: (id: string) => void;
+  course:       Course;
+  isAdmin:      boolean;
+  onEdit:       (course: Course) => void;
+  onSubtopics:  (course: Course) => void;
+  onDelete:     (id: string) => void;
 };
 
-export function CourseCard({ course, isAdmin, onEdit, onDelete }: Props) {
+function AdminMenu({ course, onEdit, onSubtopics, onDelete }: Pick<Props, "course" | "onEdit" | "onSubtopics" | "onDelete">) {
+  const [open, setOpen] = useState(false);
+  const ref  = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+        className="size-7 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
+        title="Course actions"
+      >
+        <MoreVertical className="size-3.5" style={{ color: COLORS.text }} strokeWidth={2} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-8 w-44 bg-white rounded-xl border shadow-lg z-20 overflow-hidden"
+          style={{ borderColor: COLORS.border, boxShadow: "0 4px 20px rgba(58,48,42,0.12)" }}
+        >
+          {[
+            {
+              icon: Edit2,
+              label: "Edit Course",
+              color: COLORS.text,
+              action: () => { setOpen(false); onEdit(course); },
+            },
+            {
+              icon: Layers,
+              label: "Subtopics",
+              color: COLORS.primary,
+              action: () => { setOpen(false); onSubtopics(course); },
+            },
+            {
+              icon: Trash2,
+              label: "Delete",
+              color: "#b3261e",
+              action: () => { setOpen(false); onDelete(course.id); },
+            },
+          ].map(({ icon: Icon, label, color, action }) => (
+            <button
+              key={label}
+              onClick={(e) => { e.stopPropagation(); action(); }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-stone-50 transition-colors text-left"
+              style={{ color }}
+            >
+              <Icon className="size-3.5 shrink-0" strokeWidth={2} />
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function CourseCard({ course, isAdmin, onEdit, onSubtopics, onDelete }: Props) {
   const { visible, rest } = truncateCategories(course.categories, 2);
 
   return (
@@ -42,23 +108,21 @@ export function CourseCard({ course, isAdmin, onEdit, onDelete }: Props) {
           {course.status}
         </div>
 
-        {/* Admin controls */}
+        {/* Subtopics count badge */}
+        {course.subtopics?.length > 0 && (
+          <div
+            className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/90 backdrop-blur-sm"
+            style={{ color: COLORS.primary }}
+          >
+            <Layers className="size-3" strokeWidth={2} />
+            {course.subtopics.length} topics
+          </div>
+        )}
+
+        {/* Admin 3-dot menu */}
         {isAdmin && (
-          <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={(e) => { e.stopPropagation(); onEdit(course); }}
-              className="size-7 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
-              title="Edit course"
-            >
-              <Edit2 className="size-3.5" style={{ color: COLORS.primary }} strokeWidth={2} />
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); onDelete(course.id); }}
-              className="size-7 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
-              title="Delete course"
-            >
-              <Trash2 className="size-3.5" style={{ color: "#b3261e" }} strokeWidth={2} />
-            </button>
+          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <AdminMenu course={course} onEdit={onEdit} onSubtopics={onSubtopics} onDelete={onDelete} />
           </div>
         )}
       </div>
@@ -66,7 +130,7 @@ export function CourseCard({ course, isAdmin, onEdit, onDelete }: Props) {
       {/* Body */}
       <div className="p-6">
         <h3
-          className="font-heading text-xl font-semibold mb-3 leading-snug line-clamp-2 group-hover:text-primary transition-colors"
+          className="font-heading text-xl font-semibold mb-3 leading-snug line-clamp-2"
           style={{ color: COLORS.text }}
         >
           {course.topic}

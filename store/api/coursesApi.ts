@@ -1,5 +1,5 @@
 import { baseApi } from "./baseApi";
-import type { Course, CourseStatus } from "@/components/learn/types";
+import type { Course, CourseStatus, SubTopic } from "@/components/learn/types";
 
 type PresignRequest  = { filename: string; contentType: string; uploadType: "source" | "thumbnail" };
 type PresignResponse = { url: string; key: string; fileUrl: string };
@@ -39,6 +39,13 @@ export const coursesApi = baseApi.injectEndpoints({
       query: (id) => ({ url: `/courses/${id}`, method: "DELETE" }),
       invalidatesTags: ["Course"],
     }),
+    generateSubtopics: build.mutation<{ subtopics: SubTopic[] }, string>({
+      query: (id) => ({ url: `/courses/${id}/subtopics/generate`, method: "POST" }),
+    }),
+    saveSubtopics: build.mutation<{ subtopics: SubTopic[] }, { id: string; subtopics: SubTopic[] }>({
+      query: ({ id, subtopics }) => ({ url: `/courses/${id}/subtopics`, method: "PUT", body: { subtopics } }),
+      invalidatesTags: ["Course"],
+    }),
   }),
 });
 
@@ -49,4 +56,6 @@ export const {
   useCreateCourseMutation,
   useUpdateCourseMutation,
   useDeleteCourseMutation,
+  useGenerateSubtopicsMutation,
+  useSaveSubtopicsMutation,
 } = coursesApi;

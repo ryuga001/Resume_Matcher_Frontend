@@ -1,14 +1,22 @@
 export type CourseStatus = "Not Available" | "Available";
+export type Difficulty   = "Beginner" | "Intermediate" | "Advanced";
+
+export type SubTopic = {
+  title:      string;
+  difficulty: Difficulty;
+  order:      number;
+};
 
 export type Course = {
-  id: string;
-  topic: string;
-  categories: string[];
-  status: CourseStatus;
+  id:           string;
+  topic:        string;
+  categories:   string[];
+  status:       CourseStatus;
   thumbnailUrl: string;
-  sourceFileUrl: string;
-  createdAt: string;
-  updatedAt: string;
+  sourceFileUrl:string;
+  subtopics:    SubTopic[];
+  createdAt:    string;
+  updatedAt:    string;
 };
 
 export type UploadProgress = {
