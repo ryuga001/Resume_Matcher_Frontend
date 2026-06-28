@@ -1,13 +1,13 @@
 "use client";
 
 import { useDeferredValue, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft, BookOpen, ChevronLeft, ChevronRight,
   Edit2, GraduationCap, Layers, Loader2, Search, Sparkles, Zap,
 } from "lucide-react";
 import { COLORS, CARD_STYLE } from "./constants";
 import { SubtopicsModal } from "./SubtopicsModal";
-import { SubtopicContentView } from "./SubtopicContentView";
 import { useGenerateSingleContentMutation, useGetContentStatusQuery } from "@/store/api/coursesApi";
 import type { ContentStatus, Course, Difficulty, SubTopic } from "./types";
 
@@ -137,12 +137,12 @@ type Props = {
 };
 
 export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
-  const [rawSearch,        setRawSearch]        = useState("");
-  const [page,             setPage]             = useState(0);
-  const [editOpen,         setEditOpen]         = useState(false);
-  const [selectedSubtopic, setSelectedSubtopic] = useState<SubTopic | null>(null);
+  const router = useRouter();
+  const [rawSearch,       setRawSearch]       = useState("");
+  const [page,            setPage]            = useState(0);
+  const [editOpen,        setEditOpen]        = useState(false);
   // Orders currently being dispatched (before server status updates)
-  const [localGenerating,  setLocalGenerating]  = useState<Set<number>>(new Set());
+  const [localGenerating, setLocalGenerating] = useState<Set<number>>(new Set());
 
   const search = useDeferredValue(rawSearch.toLowerCase().trim());
 
@@ -176,17 +176,6 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
   }
 
   const primaryCategory = course.categories[0] ?? "Course";
-
-  if (selectedSubtopic) {
-    return (
-      <SubtopicContentView
-        course={course}
-        subtopic={selectedSubtopic}
-        isAdmin={isAdmin}
-        onBack={() => setSelectedSubtopic(null)}
-      />
-    );
-  }
 
   return (
     <div className="px-8 py-8">
@@ -333,7 +322,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
                   isAdmin={isAdmin}
                   localGenerating={localGenerating.has(topic.order)}
                   onGenerate={() => handleGenerate(topic.order)}
-                  onView={() => setSelectedSubtopic(topic)}
+                  onView={() => router.push(`/learn/${course.id}/${topic.order}`)}
                 />
               ))}
             </div>

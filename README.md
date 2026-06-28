@@ -1,39 +1,85 @@
-# MatchKit — Frontend
+# Sahara — Frontend
 
-Next.js app for uploading resumes and getting AI-powered ATS scores against job descriptions.
+Next.js app for AI-powered resume analysis and the Sahara Academy course platform with per-subtopic AI tutoring.
+
+---
 
 ## Tech Stack
 
-- **Next.js 16** + **React 19** — framework
-- **TypeScript** — type safety
-- **Tailwind CSS v4** — styling
-- **shadcn/ui** (Radix UI primitives) — component library
-- **React Hook Form** + **Zod** — form validation
-- **Axios** / native `fetch` — API client
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 15+ (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 + inline `style={{}}` for design tokens |
+| State / data | Redux Toolkit + RTK Query |
+| UI primitives | shadcn/ui (Radix) |
+| Design system | Sahara — warm earth tones, Playfair Display headings, Noto Sans body |
+| Icons | Lucide React |
+| Markdown | react-markdown + remark-gfm |
+| Diagrams | Mermaid.js (lazy-loaded) |
+
+---
 
 ## Project Structure
 
 ```
 frontend/
 ├── app/
-│   ├── (app)/           # Authenticated shell (layout with sidebar/nav)
-│   │   ├── dashboard/   # Overview page
-│   │   ├── resumes/     # Upload & manage resumes
-│   │   ├── analyze/     # Run ATS analysis
-│   │   ├── history/     # Past analyses
-│   │   └── settings/    # Profile & password update
+│   ├── (app)/                  # Authenticated shell (sidebar layout)
+│   │   ├── layout.tsx          # Sidebar + main column
+│   │   ├── dashboard/          # Overview page
+│   │   ├── resumes/            # Upload & manage resumes
+│   │   ├── analyze/            # ATS analysis
+│   │   ├── history/[id]/       # Analysis history + detail
+│   │   ├── learn/              # Sahara Academy
+│   │   └── settings/           # Profile & password
 │   ├── login/
-│   └── register/
+│   ├── register/
+│   └── layout.tsx              # Root layout (fonts, providers)
+│
 ├── components/
-│   ├── ui/              # shadcn button, card, badge, input, skeleton
-│   └── ResumeUploader   # Drag-and-drop PDF uploader
+│   ├── analysis/               # ATS analysis feature
+│   ├── auth/                   # Login / register forms
+│   ├── dashboard/              # Dashboard widgets
+│   ├── history/                # Analysis history list + detail view
+│   ├── learn/                  # Sahara Academy
+│   │   ├── LearnPage.tsx       # Course grid + filters
+│   │   ├── CourseDetailView.tsx # Subtopic list with per-card Generate button
+│   │   ├── SubtopicContentView.tsx # Two-column: content + AI chat sidebar
+│   │   ├── ChatPanel.tsx       # AI Tutor sidebar (RAG-powered)
+│   │   ├── SubtopicsModal.tsx  # AI subtopic generation + edit modal
+│   │   ├── CourseCard.tsx
+│   │   ├── UploadModal.tsx     # Create course (direct S3 upload)
+│   │   ├── FilterBar.tsx
+│   │   ├── hooks/              # useLearn.ts
+│   │   ├── types.ts
+│   │   ├── constants.ts        # COLORS, CARD_STYLE design tokens
+│   │   └── utils.ts
+│   ├── resumes/                # Resume upload + list
+│   ├── settings/               # Profile form
+│   └── ui/                     # shadcn primitives
+│
+├── store/
+│   ├── index.ts                # configureStore
+│   ├── hooks.ts                # useAppDispatch / useAppSelector
+│   ├── slices/
+│   │   ├── authSlice.ts
+│   │   └── themeSlice.ts
+│   └── api/
+│       ├── baseApi.ts          # RTK Query base — auth headers, 401 redirect
+│       ├── authApi.ts
+│       ├── resumesApi.ts
+│       ├── analysisApi.ts
+│       └── coursesApi.ts       # All Academy endpoints
+│
 ├── lib/
-│   ├── api.ts           # Typed API client (auth, resumes, analysis)
-│   ├── auth.tsx         # Auth context + localStorage helpers
-│   ├── toast.tsx        # Toast notification context
-│   └── utils.ts         # cn() and misc helpers
-└── middleware.ts         # Route protection (redirect to /login if no token)
+│   ├── auth.tsx                # useAuth() hook — backed by authSlice
+│   └── theme.tsx               # useTheme() hook — light/dark, persisted
+│
+└── middleware.ts               # Route protection → /login if no token
 ```
+
+---
 
 ## Setup
 
@@ -51,21 +97,55 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 ```bash
-npm run dev
+npm run dev   # http://localhost:3000
 ```
 
-App runs at `http://localhost:3000`. The Next.js config proxies `/api/*` requests to the Django backend.
+Next.js proxies `/api/*` requests to the Django backend.
 
-## Key Flows
+---
 
-### Authentication
-Token is stored in `localStorage` (`rm_token`). The `middleware.ts` file protects all `/(app)/*` routes — unauthenticated users are redirected to `/login`. A 401 response from any API call clears the token and redirects to `/login`.
+## Key Features
 
-### Resume Upload
-PDFs are uploaded via `POST /api/resumes/upload`. The backend processes them asynchronously; the frontend polls `indexStatus` and shows an "Indexing…" badge until the status is `ready`.
+### ATS Resume Analysis
+- Upload PDF resumes (direct S3 presigned PUT)
+- Paste a job description → Gemini returns ATS score (0–100), matching skills, missing skills, and recommendations
+- Full analysis history with detail view
 
-### ATS Analysis
-On the Analyze page, the user selects a ready resume and pastes a job description (min 50 chars). The result includes an ATS score (0–100), matching skills, missing skills, and AI recommendations. Results are saved to history automatically.
+### Sahara Academy (Learn)
+- **Course grid** with search and category filters
+- **Admin: Create course** — upload source PDF + thumbnail directly to S3
+- **Subtopic generation** — AI analyses the source PDF and generates a structured subtopic list; async (Celery + polling)
+- **Per-subtopic content generation** — each subtopic card has its own Generate button; content includes theory, Mermaid diagrams, code examples, key points, and a 5-question quiz
+- **Content viewer** — two-column layout: scrollable content on the left, AI Tutor sidebar on the right
+- **AI Tutor (RAG chat)** — powered by Gemini with the subtopic content as context; supports multi-turn conversation and quick-suggestion chips
+- **Admin: Edit content** — raw JSON editor with save + re-embed
+
+### State Management
+All server state goes through RTK Query. Local `useState` is used only for pure UI state (open/close toggles, form fields before submission, optimistic loading indicators).
+
+Polling pattern used for async operations:
+- Subtopic generation: `pollingInterval: 2000` while `taskId` is set
+- Content status: `pollingInterval: 2000` while any subtopic shows `"generating"`
+
+---
+
+## Design System — Sahara
+
+Colors, spacing, and typography follow the Sahara design system defined in `DESIGN.md` and `components/learn/constants.ts`.
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `primary` | `#c2652a` | Buttons, active states, brand accent |
+| `text` | `#2a2826` | Headings and body |
+| `textMuted` | `#6e6862` | Secondary copy |
+| `border` | `#e4dcd6` | Card and input borders |
+| App background | `#f5ede4` | Warm sand page bg |
+| Card background | `#ffffff` | Cards on sand bg |
+
+Heading font: **Playfair Display** (`font-heading`)  
+Body font: **Noto Sans** (`font-sans`)
+
+---
 
 ## Scripts
 

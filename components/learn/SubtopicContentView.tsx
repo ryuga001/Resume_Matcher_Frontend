@@ -4,14 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
-  ArrowLeft, BookOpen, Check, ChevronDown, ChevronUp,
-  Code2, Edit3, Eye, Layers, Loader2, Save, X, Zap,
+  ArrowLeft, BookOpen, Check,
+  Code2, Edit3, Layers, Loader2, Save, Zap,
 } from "lucide-react";
 import { COLORS, CARD_STYLE } from "./constants";
 import {
   useGetSubtopicContentQuery,
   useUpdateSubtopicContentMutation,
 } from "@/store/api/coursesApi";
+import { ChatPanel } from "./ChatPanel";
 import type { Course, Difficulty, SubTopic, SubtopicContent, QuizQuestion } from "./types";
 
 const DIFFICULTY_CONFIG: Record<Difficulty, { color: string; bg: string; icon: React.ElementType }> = {
@@ -34,7 +35,13 @@ function MermaidDiagram({ code, title }: { code: string; title: string }) {
       m.default.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "loose" });
       const id = `mermaid-${Math.random().toString(36).slice(2)}`;
       m.default.render(id, code).then(({ svg }) => {
-        if (!cancelled && ref.current) ref.current.innerHTML = svg;
+        if (cancelled) return;
+        // Mermaid v11 resolves even on syntax errors — it embeds the error in the SVG
+        if (/syntax error|mermaid-error|Syntax error/i.test(svg)) {
+          setError("invalid syntax");
+          return;
+        }
+        if (ref.current) ref.current.innerHTML = svg;
       }).catch((e) => {
         if (!cancelled) setError(String(e));
       });
@@ -320,7 +327,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
 
   if (isLoading) {
     return (
-      <div className="px-8 py-8 flex items-center justify-center min-h-96">
+      <div className="flex-1 flex items-center justify-center">
         <Loader2 className="size-6 animate-spin" style={{ color: COLORS.primary }} />
       </div>
     );
@@ -328,7 +335,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
 
   if (isError || !content) {
     return (
-      <div className="px-8 py-8">
+      <div className="flex-1 px-8 py-8">
         <button onClick={onBack} className="flex items-center gap-2 mb-8 text-sm font-medium" style={{ color: COLORS.textMuted }}>
           <ArrowLeft className="size-4" strokeWidth={2} /> Back
         </button>
@@ -340,7 +347,10 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
   }
 
   return (
-    <div className="px-8 py-8">
+    <div className="flex h-full">
+      {/* ── Main content column ─────────────────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto px-8 py-8">
+
       {/* Breadcrumb */}
       <button
         onClick={onBack}
@@ -500,6 +510,16 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
             </section>
           )}
         </div>
+      )}
+      </div>{/* end scrollable content column */}
+
+      {/* AI tutor sidebar — hidden in edit mode */}
+      {!editing && (
+        <ChatPanel
+          courseId={course.id}
+          order={subtopic.order}
+          subtopicTitle={subtopic.title}
+        />
       )}
     </div>
   );

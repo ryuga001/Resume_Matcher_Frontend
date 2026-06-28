@@ -76,6 +76,16 @@ export const coursesApi = baseApi.injectEndpoints({
         body: { content },
       }),
     }),
+    chatSubtopic: build.mutation<
+      { reply: string },
+      { courseId: string; order: number; message: string; history: { role: "user" | "model"; content: string }[] }
+    >({
+      query: ({ courseId, order, message, history }) => ({
+        url: `/courses/${courseId}/content/${order}/chat`,
+        method: "POST",
+        body: { message, history },
+      }),
+    }),
   }),
 });
 
@@ -94,4 +104,5 @@ export const {
   useGetContentStatusQuery,
   useGetSubtopicContentQuery,
   useUpdateSubtopicContentMutation,
+  useChatSubtopicMutation,
 } = coursesApi;

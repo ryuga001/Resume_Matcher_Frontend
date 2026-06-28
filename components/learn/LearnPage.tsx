@@ -1,16 +1,17 @@
 "use client";
 
 import { BookOpen, GraduationCap, Plus, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { COLORS } from "./constants";
 import { CourseCard } from "./CourseCard";
-import { CourseDetailView } from "./CourseDetailView";
 import { FilterBar } from "./FilterBar";
 import { UploadModal } from "./UploadModal";
 import { SubtopicsModal } from "./SubtopicsModal";
 import { useLearn } from "./hooks/useLearn";
 
 export function LearnPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const isAdmin = user?.role === "SUPER_ADMIN";
 
@@ -22,23 +23,9 @@ export function LearnPage() {
     modalOpen, openCreate, openEdit, closeModal,
     editCourse,
     subtopicsOpen, subtopicsCourse, openSubtopics, closeSubtopics,
-    view, detailCourse, openDetail, closeDetail,
     handleDelete,
   } = useLearn();
 
-  // ── Detail view ────────────────────────────────────────────────────────────
-  if (view === "detail" && detailCourse) {
-    return (
-      <CourseDetailView
-        course={detailCourse}
-        isAdmin={isAdmin}
-        onBack={closeDetail}
-        onEdit={openEdit}
-      />
-    );
-  }
-
-  // ── List view ──────────────────────────────────────────────────────────────
   return (
     <div className="px-8 py-8">
       {/* Page header */}
@@ -112,7 +99,7 @@ export function LearnPage() {
               onEdit={openEdit}
               onSubtopics={openSubtopics}
               onDelete={handleDelete}
-              onOpen={openDetail}
+              onOpen={(course) => router.push(`/learn/${course.id}`)}
             />
           ))}
         </div>
