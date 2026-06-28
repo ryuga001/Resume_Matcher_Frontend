@@ -12,6 +12,7 @@ type Props = {
   onEdit:       (course: Course) => void;
   onSubtopics:  (course: Course) => void;
   onDelete:     (id: string) => void;
+  onOpen:       (course: Course) => void;
 };
 
 function AdminMenu({ course, onEdit, onSubtopics, onDelete }: Pick<Props, "course" | "onEdit" | "onSubtopics" | "onDelete">) {
@@ -78,13 +79,15 @@ function AdminMenu({ course, onEdit, onSubtopics, onDelete }: Pick<Props, "cours
   );
 }
 
-export function CourseCard({ course, isAdmin, onEdit, onSubtopics, onDelete }: Props) {
+export function CourseCard({ course, isAdmin, onEdit, onSubtopics, onDelete, onOpen }: Props) {
   const { visible, rest } = truncateCategories(course.categories, 2);
+  const hasSubtopics = (course.subtopics?.length ?? 0) > 0;
 
   return (
     <div
-      className="bg-white rounded-xl overflow-hidden border group transition-transform hover:-translate-y-1 cursor-pointer"
-      style={CARD_STYLE}
+      onClick={() => hasSubtopics && onOpen(course)}
+      className="bg-white rounded-xl overflow-hidden border group transition-transform hover:-translate-y-1"
+      style={{ ...CARD_STYLE, cursor: hasSubtopics ? "pointer" : "default" }}
     >
       {/* Thumbnail */}
       <div className="h-48 overflow-hidden relative bg-stone-100">

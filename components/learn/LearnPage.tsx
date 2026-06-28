@@ -4,6 +4,7 @@ import { BookOpen, GraduationCap, Plus, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { COLORS } from "./constants";
 import { CourseCard } from "./CourseCard";
+import { CourseDetailView } from "./CourseDetailView";
 import { FilterBar } from "./FilterBar";
 import { UploadModal } from "./UploadModal";
 import { SubtopicsModal } from "./SubtopicsModal";
@@ -21,9 +22,23 @@ export function LearnPage() {
     modalOpen, openCreate, openEdit, closeModal,
     editCourse,
     subtopicsOpen, subtopicsCourse, openSubtopics, closeSubtopics,
+    view, detailCourse, openDetail, closeDetail,
     handleDelete,
   } = useLearn();
 
+  // ── Detail view ────────────────────────────────────────────────────────────
+  if (view === "detail" && detailCourse) {
+    return (
+      <CourseDetailView
+        course={detailCourse}
+        isAdmin={isAdmin}
+        onBack={closeDetail}
+        onEdit={openEdit}
+      />
+    );
+  }
+
+  // ── List view ──────────────────────────────────────────────────────────────
   return (
     <div className="px-8 py-8">
       {/* Page header */}
@@ -97,6 +112,7 @@ export function LearnPage() {
               onEdit={openEdit}
               onSubtopics={openSubtopics}
               onDelete={handleDelete}
+              onOpen={openDetail}
             />
           ))}
         </div>
@@ -108,7 +124,6 @@ export function LearnPage() {
           className="mt-12 rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden"
           style={{ background: COLORS.primary }}
         >
-          {/* Grid decoration */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -124,11 +139,11 @@ export function LearnPage() {
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] mb-3 block text-white/70">
               Recommended Path
             </span>
-            <h2 className="font-heading text-3xl font-bold text-white mb-4">
+            <h2 className="font-heading text-2xl font-bold text-white mb-3">
               The Strategic Leader Path
             </h2>
             <p className="text-sm text-white/80 mb-6 max-w-md leading-relaxed">
-              A curated sequence of modules designed to transform senior professionals into strategic leaders. Master high-level thinking and stakeholder influence.
+              A curated sequence of modules designed to transform senior professionals into strategic leaders.
             </p>
             <button className="h-10 px-6 rounded-lg bg-white text-sm font-bold transition-all hover:scale-105 active:scale-95" style={{ color: COLORS.primary }}>
               Explore Path
@@ -136,8 +151,8 @@ export function LearnPage() {
           </div>
 
           <div className="relative z-10 shrink-0">
-            <div className="w-40 h-40 rounded-2xl flex flex-col items-center justify-center text-center border border-white/20 bg-white/10 backdrop-blur-sm">
-              <GraduationCap className="size-10 text-white mb-2" strokeWidth={1.5} />
+            <div className="w-36 h-36 rounded-2xl flex flex-col items-center justify-center text-center border border-white/20 bg-white/10 backdrop-blur-sm">
+              <GraduationCap className="size-8 text-white mb-2" strokeWidth={1.5} />
               <span className="font-heading text-3xl text-white">{courses.length}</span>
               <span className="text-[10px] text-white/70 uppercase tracking-widest">
                 {courses.length === 1 ? "Module" : "Modules"}
@@ -148,18 +163,10 @@ export function LearnPage() {
       )}
 
       {/* Upload / Edit modal */}
-      <UploadModal
-        open={modalOpen}
-        onClose={closeModal}
-        editCourse={editCourse}
-      />
+      <UploadModal open={modalOpen} onClose={closeModal} editCourse={editCourse} />
 
       {/* Subtopics modal */}
-      <SubtopicsModal
-        open={subtopicsOpen}
-        onClose={closeSubtopics}
-        course={subtopicsCourse}
-      />
+      <SubtopicsModal open={subtopicsOpen} onClose={closeSubtopics} course={subtopicsCourse} />
     </div>
   );
 }
