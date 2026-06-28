@@ -1,5 +1,5 @@
 import { baseApi } from "./baseApi";
-import type { Course, CourseStatus, SubTopic } from "@/components/learn/types";
+import type { Course, CourseStatus, SubTopic, SubtopicContent, ContentStatus } from "@/components/learn/types";
 
 type PresignRequest  = { filename: string; contentType: string; uploadType: "source" | "thumbnail" };
 type PresignResponse = { url: string; key: string; fileUrl: string };
@@ -7,7 +7,10 @@ type CreateCourseBody = { topic: string; categories: string[]; status: CourseSta
 type UpdateCourseBody = Partial<CreateCourseBody>;
 type CourseQuery = { search?: string; category?: string; status?: CourseStatus } | void;
 
+export type ContentStatusItem = { order: number; status: ContentStatus };
+
 export const coursesApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (build) => ({
     getCourses: build.query<Course[], CourseQuery>({
       query: (params) => {
@@ -39,12 +42,39 @@ export const coursesApi = baseApi.injectEndpoints({
       query: (id) => ({ url: `/courses/${id}`, method: "DELETE" }),
       invalidatesTags: ["Course"],
     }),
-    generateSubtopics: build.mutation<{ subtopics: SubTopic[] }, string>({
+    generateSubtopics: build.mutation<{ taskId: string }, string>({
       query: (id) => ({ url: `/courses/${id}/subtopics/generate`, method: "POST" }),
+    }),
+    getSubtopicsTaskStatus: build.query<
+      { status: "running" | "done" | "error"; subtopics?: SubTopic[]; error?: string },
+      { courseId: string; taskId: string }
+    >({
+      query: ({ courseId, taskId }) => `/courses/${courseId}/subtopics/status/${taskId}`,
     }),
     saveSubtopics: build.mutation<{ subtopics: SubTopic[] }, { id: string; subtopics: SubTopic[] }>({
       query: ({ id, subtopics }) => ({ url: `/courses/${id}/subtopics`, method: "PUT", body: { subtopics } }),
       invalidatesTags: ["Course"],
+    }),
+    generateContent: build.mutation<{ taskId: string; queued: boolean }, string>({
+      query: (id) => ({ url: `/courses/${id}/content/generate`, method: "POST" }),
+      invalidatesTags: ["Course"],
+    }),
+    generateSingleContent: build.mutation<{ queued: boolean }, { courseId: string; order: number }>({
+      query: ({ courseId, order }) => ({ url: `/courses/${courseId}/content/${order}`, method: "POST" }),
+    }),
+    getContentStatus: build.query<{ statuses: ContentStatusItem[] }, string>({
+      query: (id) => `/courses/${id}/content/status`,
+      providesTags: (_, __, id) => [{ type: "Course" as const, id }],
+    }),
+    getSubtopicContent: build.query<{ content: SubtopicContent; subtopic: SubTopic }, { courseId: string; order: number }>({
+      query: ({ courseId, order }) => `/courses/${courseId}/content/${order}`,
+    }),
+    updateSubtopicContent: build.mutation<{ ok: boolean }, { courseId: string; order: number; content: SubtopicContent }>({
+      query: ({ courseId, order, content }) => ({
+        url: `/courses/${courseId}/content/${order}`,
+        method: "PUT",
+        body: { content },
+      }),
     }),
   }),
 });
@@ -57,5 +87,11 @@ export const {
   useUpdateCourseMutation,
   useDeleteCourseMutation,
   useGenerateSubtopicsMutation,
+  useGetSubtopicsTaskStatusQuery,
   useSaveSubtopicsMutation,
+  useGenerateContentMutation,
+  useGenerateSingleContentMutation,
+  useGetContentStatusQuery,
+  useGetSubtopicContentQuery,
+  useUpdateSubtopicContentMutation,
 } = coursesApi;

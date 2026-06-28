@@ -5,7 +5,7 @@ export function formatFileSize(bytes: number): string {
 }
 
 export function getFileExt(filename: string): string {
-  return filename.includes(".") ? filename.rsplit?.(".", 1)[1] ?? filename.split(".").pop() ?? "" : "";
+  return filename.includes(".") ? (filename.split(".").pop() ?? "") : "";
 }
 
 export function truncateCategories(cats: string[], max = 2): { visible: string[]; rest: number } {

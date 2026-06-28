@@ -9,6 +9,7 @@ export type Resume = {
 };
 
 export const resumesApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (build) => ({
     getResumes: build.query<Resume[], void>({
       query: () => "/resumes/list",

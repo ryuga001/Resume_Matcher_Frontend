@@ -30,6 +30,7 @@ export type AnalysisDetail = {
 };
 
 export const analysisApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (build) => ({
     runAnalysis: build.mutation<AnalysisResult, { resumeId: string; jobDescription: string }>({
       query: (body) => ({ url: "/analysis", method: "POST", body }),

@@ -5,7 +5,7 @@ import {
   AlertCircle, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
   Layers, Loader2, Save, Sparkles, X,
 } from "lucide-react";
-import { useGenerateSubtopicsMutation, useSaveSubtopicsMutation } from "@/store/api/coursesApi";
+import { useGenerateSubtopicsMutation, useGetSubtopicsTaskStatusQuery, useSaveSubtopicsMutation } from "@/store/api/coursesApi";
 import { COLORS } from "./constants";
 import type { Course, Difficulty, SubTopic } from "./types";
 
@@ -100,9 +100,31 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
   const [page,      setPage]      = useState(0);
   const [error,     setError]     = useState("");
   const [saved,     setSaved]     = useState(false);
+  const [taskId,    setTaskId]    = useState<string | null>(null);
 
-  const [generate, { isLoading: isGenerating }] = useGenerateSubtopicsMutation();
-  const [save,     { isLoading: isSaving }]     = useSaveSubtopicsMutation();
+  const [generate, { isLoading: isPosting }] = useGenerateSubtopicsMutation();
+  const [save,     { isLoading: isSaving }]  = useSaveSubtopicsMutation();
+
+  // Poll task status every 2s while taskId is set
+  const { data: taskStatus } = useGetSubtopicsTaskStatusQuery(
+    { courseId: course?.id ?? "", taskId: taskId ?? "" },
+    { skip: !taskId || !course, pollingInterval: 2000 }
+  );
+
+  // Handle poll result
+  useEffect(() => {
+    if (!taskStatus) return;
+    if (taskStatus.status === "done") {
+      setSubtopics(taskStatus.subtopics ?? []);
+      setPage(0);
+      setTaskId(null);
+    } else if (taskStatus.status === "error") {
+      setError(taskStatus.error ?? "Generation failed. Please try again.");
+      setTaskId(null);
+    }
+  }, [taskStatus]);
+
+  const isGenerating = isPosting || !!taskId;
 
   useEffect(() => {
     if (open && course) {
@@ -110,6 +132,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
       setPage(0);
       setError("");
       setSaved(false);
+      setTaskId(null);
     }
   }, [open, course]);
 
@@ -120,11 +143,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
   const globalIndex = (localIdx: number) => page * PAGE_SIZE + localIdx;
 
   function updateAt(globalIdx: number, updated: SubTopic) {
-    setSubtopics((prev) => {
-      const next = [...prev];
-      next[globalIdx] = updated;
-      return next;
-    });
+    setSubtopics((prev) => { const next = [...prev]; next[globalIdx] = updated; return next; });
   }
 
   function moveAt(globalIdx: number, dir: -1 | 1) {
@@ -133,7 +152,6 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
     setSubtopics((prev) => {
       const next = [...prev];
       [next[globalIdx], next[target]] = [next[target], next[globalIdx]];
-      // Jump page if item moved across boundary
       const newPage = Math.floor(target / PAGE_SIZE);
       if (newPage !== page) setPage(newPage);
       return next.map((s, i) => ({ ...s, order: i + 1 }));
@@ -143,12 +161,11 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
   async function handleGenerate() {
     setError("");
     try {
-      const res = await generate(course.id).unwrap();
-      setSubtopics(res.subtopics);
-      setPage(0);
+      const res = await generate(course!.id).unwrap();
+      setTaskId(res.taskId);   // starts polling
     } catch (err: unknown) {
       const msg = (err as { data?: { error?: string } })?.data?.error;
-      setError(msg ?? "Failed to generate subtopics. Please try again.");
+      setError(msg ?? "Failed to start generation. Please try again.");
     }
   }
 
@@ -156,7 +173,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
     setError("");
     const ordered = subtopics.map((s, i) => ({ ...s, order: i + 1 }));
     try {
-      const res = await save({ id: course.id, subtopics: ordered }).unwrap();
+      const res = await save({ id: course!.id, subtopics: ordered }).unwrap();
       setSubtopics(res.subtopics);
       setSaved(true);
       setTimeout(onClose, 900);

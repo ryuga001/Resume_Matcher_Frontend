@@ -5,6 +5,7 @@ type AuthResponse = { user: User };
 type MeResponse   = User & { usesLeft: number };
 
 export const authApi = baseApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (build) => ({
     login: build.mutation<AuthResponse, { email: string; password: string }>({
       query: (body) => ({ url: "/auth/login", method: "POST", body }),
