@@ -3,27 +3,27 @@
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setCredentials, clearCredentials } from "@/store/slices/authSlice";
+import { setUser, clearUser } from "@/store/slices/authSlice";
 import type { User } from "@/store/slices/authSlice";
+import { useLogoutMutation } from "@/store/api/authApi";
 
-// Keeps the exact same interface as the original React-context version.
-// All existing components that call useAuth() continue to work unchanged.
 export function useAuth() {
   const user      = useAppSelector((s) => s.auth.user);
-  const token     = useAppSelector((s) => s.auth.token);
   const isLoading = useAppSelector((s) => s.auth.isLoading);
   const dispatch  = useAppDispatch();
   const router    = useRouter();
+  const [logoutMutation] = useLogoutMutation();
 
   const login = useCallback(
-    (token: string, user: User) => dispatch(setCredentials({ token, user })),
+    (user: User) => dispatch(setUser(user)),
     [dispatch],
   );
 
-  const logout = useCallback(() => {
-    dispatch(clearCredentials());
+  const logout = useCallback(async () => {
+    try { await logoutMutation().unwrap(); } catch { /* cookie cleanup still happens */ }
+    dispatch(clearUser());
     router.push("/login");
-  }, [dispatch, router]);
+  }, [dispatch, router, logoutMutation]);
 
-  return { user, token, isLoading, login, logout };
+  return { user, isLoading, login, logout };
 }

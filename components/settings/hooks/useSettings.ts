@@ -8,7 +8,7 @@ import { useGetMeQuery, useUpdateProfileMutation } from "@/store/api/authApi";
 type RtkError = { data?: { error?: string } };
 
 export function useSettings() {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const { toast }       = useToast();
 
   const { data: me }           = useGetMeQuery();
@@ -29,8 +29,7 @@ export function useSettings() {
     if (!name.trim() || name === user?.name) return;
     setNameLoading(true);
     try {
-      const res = await updateProfile({ name }).unwrap();
-      login(res.token, res.user);
+      await updateProfile({ name }).unwrap();
       setNameSaved(true);
       setTimeout(() => setNameSaved(false), 2000);
     } catch (err) {
@@ -46,8 +45,7 @@ export function useSettings() {
     if (newPw.length < 8)     { toast("New password must be at least 8 characters.", "error"); return; }
     setPwLoading(true);
     try {
-      const res = await updateProfile({ currentPassword: currentPw, newPassword: newPw }).unwrap();
-      login(res.token, res.user);
+      await updateProfile({ currentPassword: currentPw, newPassword: newPw }).unwrap();
       setCurrentPw(""); setNewPw(""); setConfirmPw("");
       toast("Password changed.", "success");
     } catch (err) {

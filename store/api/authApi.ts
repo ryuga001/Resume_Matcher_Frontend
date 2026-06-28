@@ -1,7 +1,7 @@
 import { baseApi } from "./baseApi";
+import type { User } from "../slices/authSlice";
 
-type User = { id: string; email: string; name: string };
-type AuthResponse = { token: string; user: User };
+type AuthResponse = { user: User };
 type MeResponse   = User & { usesLeft: number };
 
 export const authApi = baseApi.injectEndpoints({
@@ -11,6 +11,9 @@ export const authApi = baseApi.injectEndpoints({
     }),
     register: build.mutation<AuthResponse, { name: string; email: string; password: string }>({
       query: (body) => ({ url: "/auth/register", method: "POST", body }),
+    }),
+    logout: build.mutation<{ ok: boolean }, void>({
+      query: () => ({ url: "/auth/logout", method: "POST" }),
     }),
     getMe: build.query<MeResponse, void>({
       query: () => "/auth/me",
@@ -26,6 +29,7 @@ export const authApi = baseApi.injectEndpoints({
 export const {
   useLoginMutation,
   useRegisterMutation,
+  useLogoutMutation,
   useGetMeQuery,
   useUpdateProfileMutation,
 } = authApi;

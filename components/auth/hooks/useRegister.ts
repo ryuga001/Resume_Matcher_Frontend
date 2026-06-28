@@ -23,7 +23,7 @@ export function useRegister() {
     setError("");
     try {
       const data = await registerMutation({ name, email, password }).unwrap();
-      login(data.token, data.user);
+      login(data.user);
       router.replace("/dashboard");
     } catch (err) {
       setError((err as RtkError)?.data?.error ?? "Registration failed.");

@@ -22,7 +22,7 @@ export function useLogin() {
     setError("");
     try {
       const data = await loginMutation({ email, password }).unwrap();
-      login(data.token, data.user);
+      login(data.user);
       router.replace("/dashboard");
     } catch (err) {
       setError((err as RtkError)?.data?.error ?? "Login failed.");

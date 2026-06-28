@@ -18,8 +18,11 @@ export function proxy(req: NextRequest) {
   const isProtected = PROTECTED.some((p) => pathname === p || pathname.startsWith(p + "/"));
   if (!isProtected) return NextResponse.next();
 
-  const token = req.cookies.get("rm_token")?.value;
-  if (!token) {
+ const hasSession =
+    req.cookies.get("rm_access_token")?.value ||
+    req.cookies.get("rm_refresh_token")?.value;
+
+  if (!hasSession) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

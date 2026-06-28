@@ -1,29 +1,39 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Provider } from "react-redux";
 import { store } from "@/store";
 import { useAppDispatch } from "@/store/hooks";
-import { hydrateAuth } from "@/store/slices/authSlice";
+import { setUser, clearUser } from "@/store/slices/authSlice";
 import { setTheme } from "@/store/slices/themeSlice";
 import type { ThemeMode } from "@/store/slices/themeSlice";
+import { useGetMeQuery } from "@/store/api/authApi";
 import { ToastProvider } from "@/lib/toast";
+
+const AUTH_PATHS = ["/", "/login", "/register"];
 
 function AuthInitializer() {
   const dispatch = useAppDispatch();
+  const pathname = usePathname();
+  const isAuthPage = AUTH_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
+
+  const { data, isLoading } = useGetMeQuery(undefined, { skip: isAuthPage });
+
   useEffect(() => {
-    const token   = localStorage.getItem("rm_token");
-    const userStr = localStorage.getItem("rm_user");
-    if (token && userStr) {
-      try {
-        dispatch(hydrateAuth({ token, user: JSON.parse(userStr) }));
-      } catch {
-        dispatch(hydrateAuth(null));
-      }
-    } else {
-      dispatch(hydrateAuth(null));
+    if (isAuthPage) {
+      dispatch(clearUser());
+      return;
     }
-  }, [dispatch]);
+    if (!isLoading) {
+      if (data) {
+        dispatch(setUser({ id: data.id, email: data.email, name: data.name, role: data.role }));
+      } else {
+        dispatch(clearUser());
+      }
+    }
+  }, [data, isLoading, isAuthPage, dispatch]);
+
   return null;
 }
 
