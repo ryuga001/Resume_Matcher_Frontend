@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PROTECTED = ["/dashboard", "/resumes", "/analyze", "/history", "/settings"];
+const PROTECTED = ["/dashboard", "/resumes", "/analyze", "/learn", "/history", "/settings"];
 
 function isPublic(pathname: string): boolean {
   if (pathname === "/") return true;

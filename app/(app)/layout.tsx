@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import {
   FileText,
+  GraduationCap,
   History,
   LayoutDashboard,
   Loader2,
@@ -21,7 +22,8 @@ const NAV = [
   { href: "/dashboard",  label: "Dashboard",     icon: LayoutDashboard },
   { href: "/resumes",    label: "Resumes",        icon: FileText },
   { href: "/analyze",    label: "Intelligence",   icon: Sparkles },
-  { href: "/history",    label: "History",     icon: History },
+  { href: "/learn",      label: "Academy",        icon: GraduationCap },
+  { href: "/history",    label: "History",        icon: History },
   { href: "/settings",   label: "Settings",       icon: Settings },
 ];
 

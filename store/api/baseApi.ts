@@ -30,6 +30,6 @@ export const baseApi = createApi({
 
     return result;
   },
-  tagTypes: ["Resume", "Analysis", "Me"],
+  tagTypes: ["Resume", "Analysis", "Me", "Course"],
   endpoints: () => ({}),
 });
