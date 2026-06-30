@@ -29,9 +29,9 @@ export function AnalyzeForm({
     <div className="px-8 py-8">
       <div className="max-w-5xl mx-auto">
         <header className="mb-6">
-          <h1 className="font-heading text-4xl font-bold" style={{ color: COLORS.text }}>Analyze a Match</h1>
+          <h1 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>Job Match Analysis</h1>
           <p className="text-sm mt-1 max-w-xl" style={{ color: COLORS.textMuted }}>
-            Compare your profile with any job description to discover gaps and receive tailored recommendations.
+            Select your resume, paste a job description, and get an instant ATS score with a precise gap analysis and tailored recommendations.
           </p>
         </header>
 

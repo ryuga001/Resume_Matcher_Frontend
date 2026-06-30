@@ -21,7 +21,7 @@ export function HistoryDetailPage() {
           <Link href="/history"><ArrowLeft className="size-4" /></Link>
         </Button>
         <div className="min-w-0">
-          <h1 className="font-heading text-4xl font-bold truncate" style={{ color: "#2a2826" }}>
+          <h1 className="font-heading text-2xl font-bold truncate" style={{ color: "#2a2826" }}>
             {loading ? <Skeleton className="h-9 w-64 inline-block" /> : detail?.resumeName ?? "Analysis Result"}
           </h1>
           {detail?.createdAt && (

@@ -22,7 +22,8 @@ export function SettingsPage() {
     <div className="px-8 py-8">
       <div className="max-w-4xl mx-auto">
         <header className="mb-6">
-          <h1 className="font-heading text-4xl font-bold" style={{ color: "#2a2826" }}>Settings</h1>
+          <h1 className="font-heading text-2xl font-bold" style={{ color: "#2a2826" }}>Account Settings</h1>
+          <p className="text-sm mt-1" style={{ color: "#6e6862" }}>Manage your profile, security, and plan preferences.</p>
         </header>
         <div className="space-y-6">
           <ProfileSection

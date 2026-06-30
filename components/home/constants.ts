@@ -19,3 +19,21 @@ export const HOW_IT_WORKS: { step: string; title: string; desc: string }[] = [
 ];
 
 export const CTA_PERKS: string[] = ["No credit card", "10 free analyses", "Cancel anytime"];
+
+export const POPULAR_COURSES: {
+  title: string;
+  category: string;
+  lessons: number;
+  level: "Beginner" | "Intermediate" | "Advanced";
+}[] = [
+  { title: "The Strategic Resume", category: "Career Strategy", lessons: 8, level: "Beginner" },
+  { title: "Interview Mastery", category: "Interviewing", lessons: 12, level: "Intermediate" },
+  { title: "Negotiating Your Offer", category: "Compensation", lessons: 6, level: "Intermediate" },
+  { title: "Leading Without a Title", category: "Leadership", lessons: 10, level: "Advanced" },
+];
+
+export const TUTOR_PROMPTS: string[] = [
+  "Explain STAR answers with an example",
+  "How do I quantify impact on my resume?",
+  "What should I research before this interview?",
+];

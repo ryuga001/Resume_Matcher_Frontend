@@ -11,8 +11,8 @@ export function CtaSection() {
   useGsapReveal([{ ref }]);
 
   return (
-    <section ref={ref} className="py-28" style={{ background: "transparent" }}>
-      <div className="max-w-3xl mx-auto px-8">
+    <section ref={ref} className="flex min-h-screen items-center py-24" style={{ background: "transparent" }}>
+      <div className="max-w-3xl mx-auto px-8 w-full">
         <div
           className="rounded-xl px-8 py-14 text-center"
           style={{

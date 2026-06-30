@@ -378,7 +378,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
             >
               {subtopic.difficulty}
             </span>
-            <h1 className="font-heading text-4xl font-bold leading-tight" style={{ color: COLORS.text }}>
+            <h1 className="font-heading text-2xl font-bold leading-tight" style={{ color: COLORS.text }}>
               {subtopic.title}
             </h1>
           </div>

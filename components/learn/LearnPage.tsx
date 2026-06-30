@@ -31,11 +31,11 @@ export function LearnPage() {
       {/* Page header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="font-heading text-4xl font-bold" style={{ color: COLORS.text }}>
-            Career Intelligence Academy
+          <h1 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>
+            Academy
           </h1>
           <p className="text-sm mt-1.5 max-w-xl" style={{ color: COLORS.textMuted }}>
-            Curated strategic insights for the modern professional. Deepen your expertise with our library of advanced modules.
+            Sharpen your competitive edge. Curated modules on career strategy, interview mastery, and industry trends — built for ambitious professionals.
           </p>
         </div>
 

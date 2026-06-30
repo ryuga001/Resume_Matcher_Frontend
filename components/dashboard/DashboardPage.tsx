@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { useDashboard } from "@/components/dashboard/hooks/useDashboard";
 import { DashboardTopBar } from "@/components/dashboard/DashboardTopBar";
@@ -16,10 +16,19 @@ import { scoreBarColor, scoreStatusLabel } from "@/components/dashboard/utils";
 
 export function DashboardPage() {
   const { user, resumes, history, loading, avg, recent, scoreTrend, topSkills } = useDashboard();
+  const hasAnimated = useRef(false);
 
   useEffect(() => {
-    if (loading) return;
-    gsap.from(".dash-card", { opacity: 0, y: 20, stagger: 0.08, duration: 0.5, ease: "power2.out" });
+    if (loading || hasAnimated.current) return;
+    hasAnimated.current = true;
+    gsap.from(".dash-card", {
+      opacity: 0,
+      y: 20,
+      stagger: 0.08,
+      duration: 0.5,
+      ease: "power2.out",
+      onComplete: () => gsap.set(".dash-card", { clearProps: "all" }),
+    });
   }, [loading]);
 
   return (

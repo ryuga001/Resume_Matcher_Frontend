@@ -1,30 +1,50 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { cn } from "@/lib/utils";
 import { X, CheckCircle2, AlertCircle, Info } from "lucide-react";
 
-type ToastType = "success" | "error" | "info";
+export type ToastType = "success" | "error" | "info";
+
 interface Toast { id: string; message: string; type: ToastType }
 interface ToastContextValue { toast: (message: string, type?: ToastType) => void }
 
 const ToastContext = createContext<ToastContextValue>({ toast: () => {} });
 
+const CONFIG: Record<ToastType, {
+  bg: string; border: string; text: string; iconColor: string; closeColor: string; label: string; Icon: typeof CheckCircle2;
+}> = {
+  success: {
+    bg: "#f0fdf4", border: "#bbf7d0", text: "#15803d", iconColor: "#16a34a", closeColor: "#86efac",
+    label: "Success", Icon: CheckCircle2,
+  },
+  error: {
+    bg: "#fef2f2", border: "#fecaca", text: "#b91c1c", iconColor: "#ef4444", closeColor: "#fca5a5",
+    label: "Failed", Icon: AlertCircle,
+  },
+  info: {
+    bg: "#eff6ff", border: "#bfdbfe", text: "#1d4ed8", iconColor: "#3b82f6", closeColor: "#93c5fd",
+    label: "Info", Icon: Info,
+  },
+};
+
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const remove = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   const toast = useCallback((message: string, type: ToastType = "info") => {
     const id = Math.random().toString(36).slice(2);
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
   }, []);
 
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+      <div className="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2.5 pointer-events-none">
         {toasts.map((t) => (
-          <ToastItem key={t.id} toast={t} onClose={() => setToasts((p) => p.filter((x) => x.id !== t.id))} />
+          <ToastItem key={t.id} toast={t} onClose={() => remove(t.id)} />
         ))}
       </div>
     </ToastContext.Provider>
@@ -33,30 +53,29 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onClose, 4000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(onClose, 4500);
+    return () => clearTimeout(timer);
   }, [onClose]);
 
-  const Icon = toast.type === "success" ? CheckCircle2 : toast.type === "error" ? AlertCircle : Info;
-  const colors = {
-    success: "bg-card border-success/30 text-foreground",
-    error:   "bg-card border-destructive/30 text-foreground",
-    info:    "bg-card border-border text-foreground",
-  };
-  const iconColors = {
-    success: "text-success",
-    error:   "text-destructive",
-    info:    "text-muted-foreground",
-  };
+  const { bg, border, text, iconColor, closeColor, label, Icon } = CONFIG[toast.type];
 
   return (
-    <div className={cn(
-      "pointer-events-auto flex items-start gap-3 rounded-md border px-4 py-3 shadow-lg text-sm max-w-xs animate-in slide-in-from-bottom-2 fade-in",
-      colors[toast.type]
-    )}>
-      <Icon className={cn("size-4 mt-0.5 shrink-0", iconColors[toast.type])} />
-      <span className="flex-1 leading-snug">{toast.message}</span>
-      <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
+    <div
+      className="pointer-events-auto flex items-start gap-3 rounded-lg px-4 py-3 shadow-md min-w-[260px] max-w-[340px]"
+      style={{ background: bg, border: `1px solid ${border}`, animation: "toast-in 0.2s ease forwards" }}
+    >
+      <Icon className="size-4 mt-0.5 shrink-0" style={{ color: iconColor }} strokeWidth={2} />
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] mb-0.5" style={{ color: iconColor }}>
+          {label}
+        </p>
+        <p className="text-sm leading-snug" style={{ color: text }}>{toast.message}</p>
+      </div>
+      <button
+        onClick={onClose}
+        className="shrink-0 mt-0.5 transition-opacity hover:opacity-60"
+        style={{ color: closeColor }}
+      >
         <X className="size-3.5" />
       </button>
     </div>

@@ -10,11 +10,11 @@ export function DashboardTopBar({ userName }: DashboardTopBarProps) {
   return (
     <div className="px-8 pt-8 pb-5 flex items-start justify-between gap-4">
       <div>
-        <h1 className="font-heading text-4xl font-bold leading-tight" style={{ color: COLORS.textPrimary }}>
-          Good to see you, {userName}.
+        <h1 className="font-heading text-2xl font-bold leading-tight" style={{ color: COLORS.textPrimary }}>
+          Welcome back, {userName}.
         </h1>
         <p className="text-sm mt-1" style={{ color: COLORS.textSecondary }}>
-          Your career intelligence is updating in real-time.
+          Here&apos;s an overview of your career activity and latest insights.
         </p>
       </div>
       <div className="flex items-center gap-3 shrink-0 mt-1">

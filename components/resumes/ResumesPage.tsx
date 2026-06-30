@@ -34,9 +34,9 @@ export function ResumesPage() {
     <div className="px-8 py-8">
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-heading text-4xl font-bold" style={{ color: "#2a2826" }}>Resumes</h1>
+          <h1 className="font-heading text-2xl font-bold" style={{ color: "#2a2826" }}>Resume Library</h1>
           <p className="text-sm mt-1" style={{ color: "#6e6862" }}>
-            Your PDF library. Select a resume when running an analysis.
+            Upload and manage your resumes. Select one to run an AI match analysis or build a tailored version.
           </p>
         </div>
         {!loading && resumes.length > 0 && (

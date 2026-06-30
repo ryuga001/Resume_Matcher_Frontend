@@ -63,6 +63,14 @@ Score badges (used in history cards):
 | Matching | `#e8f5e9` | `#2e7d32` |
 | Missing | `#fce4e0` | `#8c3c3c` |
 
+### Toast notification colors
+
+| Type | Background | Border | Text | Icon |
+|------|-----------|--------|------|------|
+| **Info** | `#eff6ff` | `#bfdbfe` | `#1d4ed8` | `#3b82f6` |
+| **Success** | `#f0fdf4` | `#bbf7d0` | `#15803d` | `#16a34a` |
+| **Failed** | `#fef2f2` | `#fecaca` | `#b91c1c` | `#ef4444` |
+
 ### CSS variables (from `globals.css`)
 
 The CSS layer uses OKLCH-based shadcn tokens. For component code, prefer the `COLORS` constants. Use CSS vars only in global CSS or Tailwind utility classes.
@@ -92,15 +100,17 @@ The CSS layer uses OKLCH-based shadcn tokens. For component code, prefer the `CO
 
 | Class | Role | Usage |
 |-------|------|-------|
-| `font-heading text-4xl font-bold` | **Page title** | Every page's top-level heading |
-| `font-heading text-2xl font-bold` | **Section heading** | Before a section card (with icon) |
-| `font-heading text-xl font-semibold` | **Card heading** | Inside a card or panel |
+| `font-heading text-2xl font-bold` | **Page title** | Every page's top-level `h1` |
+| `font-heading text-xl font-semibold` | **Section heading** | Before a section card (with icon) |
+| `font-heading text-lg font-semibold` | **Card heading** | Inside a card or panel |
 | `text-sm font-bold` | **Emphasized body** | File names, stat sub-labels |
 | `text-sm` | **Body** | All descriptive copy |
 | `text-xs` | **Meta** | Dates, timestamps, secondary info |
 | `text-[10px] font-bold uppercase tracking-[0.14em]` | **Eyebrow / label** | Section labels, form field labels, step indicators |
 
-> **Rule**: Never use `text-5xl`, `text-3xl`, `text-[9px]`, or `tracking-[0.12em]` anywhere. There are no exceptions to the eyebrow format.
+**Large display numbers** (stat cards, score gauge) — `font-heading text-4xl font-bold`. These are metric displays, not headings, and intentionally larger.
+
+> **Rule**: Page `h1` headings are `text-2xl`. Never use `text-4xl`, `text-5xl`, or `text-3xl` for page titles. Never use `text-[9px]` or `tracking-[0.12em]` anywhere.
 
 ---
 
@@ -112,21 +122,21 @@ This section is the authoritative standard. Every component MUST follow these ru
 
 Every page wrapper — no exceptions:
 ```tsx
-<div className="px-10 py-10 min-h-screen">
+<div className="px-8 py-8">
   <div className="max-w-5xl mx-auto">  {/* only on content-focused pages */}
 ```
 
 Page header block (title + subtitle):
 ```tsx
-<header className="mb-8">
-  <h1 className="font-heading text-4xl font-bold" style={{ color: COLORS.text }}>Page Title</h1>
+<header className="mb-6">
+  <h1 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>Page Title</h1>
   <p className="text-sm mt-1" style={{ color: COLORS.textMuted }}>Subtitle copy.</p>
 </header>
 ```
 
 ### Page layout
 
-The app shell uses `h-screen overflow-hidden` on the root wrapper and `overflow-y-auto` on the main column. The sidebar is always fixed-height. Page components must **not** use `min-h-screen` — the parent already handles it.
+The app shell is a vertical flex column: **top navbar** (`h-12`) → body row (sidebar + main). The root wrapper uses `h-screen flex flex-col overflow-hidden`. The body row uses `flex flex-1 overflow-hidden`. Only the `<main>` column scrolls (`overflow-y-auto`). Page components must **not** use `min-h-screen`.
 
 ### Spacing rules
 
@@ -160,9 +170,9 @@ Always exactly this structure before a card:
 <section>
   <div className="flex items-center gap-3 mb-3">
     <IconName className="size-5" style={{ color: COLORS.primary }} strokeWidth={1.8} />
-    <h2 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>Title</h2>
+    <h2 className="font-heading text-xl font-semibold" style={{ color: COLORS.text }}>Title</h2>
   </div>
-  <div className="bg-white rounded-xl p-8 border" style={CARD_STYLE}>
+  <div className="bg-white rounded-xl p-6 border" style={CARD_STYLE}>
     {/* content */}
   </div>
 </section>
@@ -182,6 +192,8 @@ One radius per element type — no mixing:
 | **Badge / tag / chip** | `rounded-full` | 9999px |
 | **Icon box** | `rounded-xl` | 14px |
 | **Loading modal** | `rounded-[32px]` | 32px (only exception) |
+| **Toast** | `rounded-lg` | 8px |
+| **Dropdown menu** | `rounded-lg` | 8px |
 
 > **Rule**: Cards are always `rounded-xl`. Never `rounded-2xl`, `rounded-3xl`, or `rounded-md` for cards.
 
@@ -196,6 +208,8 @@ One radius per element type — no mixing:
 | Strong | `0 4px 32px rgba(58,48,42,0.07)` | Loading modal |
 | CTA | `0 4px 20px rgba(194,101,42,0.25)` | Primary action button |
 | Input focus | `0 0 0 3px rgba(194,101,42,0.10)` | Textarea / input focus ring |
+| Dropdown | `0 4px 16px rgba(58,48,42,0.10)` | Profile dropdown, floating menus |
+| Toast | `shadow-md` (Tailwind) | Toast notifications |
 
 ---
 
@@ -204,7 +218,7 @@ One radius per element type — no mixing:
 ### Card
 ```tsx
 <div
-  className="bg-white rounded-xl p-8 border"
+  className="bg-white rounded-xl p-6 border"
   style={{ borderColor: COLORS.borderMuted, boxShadow: "0 2px 16px rgba(58,48,42,0.04)" }}
 >
 ```
@@ -261,10 +275,48 @@ style={{
 }}
 ```
 
-### Accent divider under page title
+### Profile dropdown (top navbar)
+Opens on `onMouseEnter`, closes on `onMouseLeave` of the wrapper div.
 ```tsx
-<div className="h-1 w-16 mt-2 rounded-full" style={{ background: "rgba(194,101,42,0.3)" }} />
+<div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+  {/* avatar trigger */}
+  <button className="size-8 rounded-full text-white text-sm font-bold" style={{ background: "#c2652a" }}>
+    {initial}
+  </button>
+  {open && (
+    <div
+      className="absolute right-0 top-full mt-1 w-44 rounded-lg bg-white border shadow-lg py-1"
+      style={{ borderColor: "#e4dcd6", boxShadow: "0 4px 16px rgba(58,48,42,0.10)" }}
+    >
+      {/* name / email header */}
+      <div className="px-4 py-2 border-b" style={{ borderColor: "#f0e8e2" }}>
+        <p className="text-sm font-semibold truncate" style={{ color: "#2a2826" }}>{name}</p>
+        <p className="text-[10px] truncate" style={{ color: "#9e8e84" }}>{email}</p>
+      </div>
+      {/* Profile link */}
+      <Link href="/settings" className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-stone-50" style={{ color: "#2a2826" }}>
+        <User className="size-3.5" style={{ color: "#9e8e84" }} /> Profile
+      </Link>
+      {/* Logout — always red */}
+      <button onClick={logout} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-red-50" style={{ color: "#dc2626" }}>
+        <LogOut className="size-3.5" /> Logout
+      </button>
+    </div>
+  )}
+</div>
 ```
+
+### Toast notification
+Toasts are dispatched via `useToast()` from `@/lib/toast`.
+
+```ts
+const { toast } = useToast();
+toast("Resume uploaded successfully.", "success");
+toast("Analysis failed. Please try again.", "error");
+toast("Processing may take a moment.", "info");
+```
+
+Three types: `"success"` (green), `"error"` (red/Failed), `"info"` (blue). Auto-dismiss after 4.5 s. Fixed bottom-right `z-[9999]`. Animates in via `toast-in` keyframe. Never create a second toast provider.
 
 ---
 
@@ -277,6 +329,10 @@ Defined as global keyframes in `globals.css`. Use via className — never re-def
 | `.fade-up` | opacity 0→1, translateY 8px→0, 0.35s | Page section entry |
 | `.fade-up-delay-1/2/3` | same + 50/100/150ms delay | Staggered lists |
 | `.score-arc-fill` | stroke-dashoffset animation, 1s cubic | Score arc in history detail |
+
+`toast-in` is a named keyframe (opacity + scale + translateY, 0.2s) used by the toast system via inline `animation` style — not a utility class.
+
+GSAP is used for dashboard card entry (`.dash-card` selector, `gsap.from()`) and sidebar link hover micro-animations. Always call `gsap.set(".dash-card", { clearProps: "all" })` in `onComplete` to release GPU compositor layers and prevent blurry text.
 
 Inline-only animations (defined in `<style>` inside `LoadingView`):
 
@@ -291,10 +347,24 @@ Inline-only animations (defined in `<style>` inside `LoadingView`):
 ## 9. Layout Shell
 
 ### App layout (`(app)/layout.tsx`)
-- White sidebar `w-[220px]`, fixed, `border-r` `#ede8e3`
-- Page background: `#f5ede4`
-- Main content: `flex-1 min-w-0 overflow-auto`
-- Mobile: slide-in sidebar + black/30 overlay
+
+The shell is a vertical flex column:
+
+```
+┌─────────────────────────────────────────────┐  h-12   (TopNav)
+│ Sahara  Career Intelligence      [avatar ▾] │
+├────────────┬────────────────────────────────┤  flex-1 (body row)
+│            │                                │
+│  Sidebar   │         Main content           │
+│  w-[220px] │      overflow-y-auto           │
+│            │                                │
+└────────────┴────────────────────────────────┘
+```
+
+- **TopNav** — `h-12`, `bg-white`, `border-b #ede8e3`. Left: logo + tagline. Right: user avatar with hover profile dropdown.
+- **Sidebar** — `w-[220px]`, `bg-white`, `border-r #ede8e3`. Contains nav links + Pro upgrade banner. No logo, no user section.
+- **Main** — `flex-1 min-w-0 overflow-y-auto`. Background `#f5ede4`.
+- **Mobile** — hamburger in TopNav opens a slide-in sidebar (same `w-[220px]`, positioned `top: 48px` to sit below the navbar) + `bg-black/30` overlay.
 
 ### Auth pages
 Use the `.auth-grid` CSS class for the dot/line grid background with radial fade.
@@ -309,7 +379,7 @@ These global CSS classes are deprecated. Use inline Tailwind following the spaci
 
 Library: **Lucide React** (`lucide-react`).  
 Stroke width default: `1.5` for decorative icons, `2` for action icons (buttons).  
-Size: `size-4` (nav), `size-5` (card icons), `size-8`+ (empty states), `size-12` (hero loading icon).
+Size: `size-3.5` (dropdown items), `size-4` (nav, inline), `size-5` (card icons), `size-8`+ (empty states), `size-12` (hero loading icon).
 
 ---
 
@@ -320,5 +390,7 @@ Size: `size-4` (nav), `size-5` (card icons), `size-8`+ (empty states), `size-12`
 | Color tokens | `components/analysis/constants.ts` → `COLORS` |
 | Score thresholds | `components/analysis/constants.ts` → `SCORE_THRESHOLDS` |
 | Score helpers | `components/analysis/utils.ts` |
+| Toast system | `lib/toast.tsx` → `ToastProvider`, `useToast()` |
 | CSS variables + keyframes | `app/globals.css` |
 | Fonts | `app/layout.tsx` (Google Fonts via `next/font`) |
+| App shell | `app/(app)/layout.tsx` — `TopNav`, `Sidebar`, `AppLayout` |

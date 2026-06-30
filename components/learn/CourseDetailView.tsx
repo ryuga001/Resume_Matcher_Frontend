@@ -202,7 +202,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
               {primaryCategory}
             </span>
 
-            <h1 className="font-heading text-4xl font-bold leading-tight mb-3" style={{ color: COLORS.text }}>
+            <h1 className="font-heading text-2xl font-bold leading-tight mb-3" style={{ color: COLORS.text }}>
               {course.topic}
             </h1>
 
