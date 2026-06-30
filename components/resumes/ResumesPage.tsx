@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useResumes } from "@/components/resumes/hooks/useResumes";
 import { UploadZone } from "@/components/resumes/UploadZone";
 import { ResumeLibrary } from "@/components/resumes/ResumeLibrary";
+import { ResumeViewerModal } from "@/components/resumes/ResumeViewerModal";
 
 export function ResumesPage() {
   const {
@@ -17,6 +18,8 @@ export function ResumesPage() {
     setSelectedFile,
     deleteId,
     expanded,
+    viewingId,
+    setViewingId,
     inputRef,
     handleFile,
     handleUpload,
@@ -25,6 +28,7 @@ export function ResumesPage() {
   } = useResumes();
 
   const showUploadZone = resumes.length === 0 || !!selectedFile;
+  const viewingResume = viewingId ? resumes.find((r) => r.resumeId === viewingId) : null;
 
   return (
     <div className="px-8 py-8">
@@ -83,9 +87,17 @@ export function ResumesPage() {
           deleteId={deleteId}
           onToggle={toggleExpanded}
           onDelete={handleDelete}
+          onView={(id) => setViewingId(id)}
         />
       </div>
+
+      {viewingResume && (
+        <ResumeViewerModal
+          resumeId={viewingResume.resumeId}
+          fileName={viewingResume.fileName}
+          onClose={() => setViewingId(null)}
+        />
+      )}
     </div>
   );
 }
-

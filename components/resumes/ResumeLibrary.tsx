@@ -10,6 +10,7 @@ type Props = {
   deleteId: string | null;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onView: (id: string) => void;
 };
 
 export function ResumeLibrary({
@@ -19,6 +20,7 @@ export function ResumeLibrary({
   deleteId,
   onToggle,
   onDelete,
+  onView,
 }: Props) {
   if (loading) {
     return (
@@ -61,6 +63,7 @@ export function ResumeLibrary({
             deleteId={deleteId}
             onToggle={onToggle}
             onDelete={onDelete}
+            onView={onView}
           />
         ))}
       </div>

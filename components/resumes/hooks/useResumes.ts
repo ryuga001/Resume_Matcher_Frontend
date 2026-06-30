@@ -31,6 +31,7 @@ export function useResumes() {
   const [selectedFile,  setSelectedFile]  = useState<File | null>(null);
   const [deleteId,      setDeleteId]      = useState<string | null>(null);
   const [expanded,      setExpanded]      = useState<string | null>(null);
+  const [viewingId,     setViewingId]     = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleFile(f: File) {
@@ -81,6 +82,8 @@ export function useResumes() {
     setSelectedFile,
     deleteId,
     expanded,
+    viewingId,
+    setViewingId,
     inputRef,
     handleFile,
     handleUpload,

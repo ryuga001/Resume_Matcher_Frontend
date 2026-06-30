@@ -1,6 +1,6 @@
 # Sahara — Frontend
 
-Next.js app for AI-powered resume analysis and the Sahara Academy course platform with per-subtopic AI tutoring.
+Next.js 15 App Router application for AI-powered ATS resume analysis, a live resume builder, and the Sahara Academy course platform with per-subtopic AI tutoring.
 
 ---
 
@@ -8,174 +8,195 @@ Next.js app for AI-powered resume analysis and the Sahara Academy course platfor
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 16 (App Router) |
+| Framework | Next.js 15 (App Router) |
 | Language | TypeScript |
-| Styling | Tailwind CSS v4 + inline `style={{}}` for design tokens |
-| State / data | Redux Toolkit + RTK Query |
-| UI primitives | shadcn/ui (Radix UI) |
-| Forms | React Hook Form + Zod |
-| HTTP client | Axios |
-| Design system | Sahara — warm earth tones, Playfair Display headings, Noto Sans body |
-| Icons | Lucide React |
-| 3D / animation | Three.js + GSAP (landing page hero canvas) |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| State | Redux Toolkit + RTK Query |
+| Animations | GSAP (score counter, card stagger, nav hover) |
+| 3D | Three.js (dashboard wireframe globe) |
 | Markdown | react-markdown + remark-gfm |
-| Diagrams | Mermaid.js (lazy-loaded) |
+| Diagrams | Mermaid.js |
+| Fonts | Playfair Display (headings) + Noto Sans (body) |
 
 ---
 
-## Project Structure
+## Route Map
 
 ```
-frontend/
-├── app/
-│   ├── (app)/                  # Authenticated shell (sidebar layout)
-│   │   ├── layout.tsx          # Sidebar + main column
-│   │   ├── dashboard/          # Overview page
-│   │   ├── resumes/            # Upload & manage resumes
-│   │   ├── analyze/            # ATS analysis
-│   │   ├── history/            # Analysis history list
-│   │   │   └── [id]/           # Analysis detail
-│   │   ├── learn/              # Sahara Academy — course grid
-│   │   │   ├── [courseId]/     # Course detail + subtopic list
-│   │   │   └── [courseId]/[order]/  # Subtopic content viewer
-│   │   └── settings/           # Profile & password
-│   ├── login/
-│   ├── register/
-│   └── layout.tsx              # Root layout (fonts, providers)
+app/
+├── page.tsx                       Landing page (/)
+├── login/page.tsx                 Login
+├── register/page.tsx              Register
+└── (app)/                         Authenticated shell (sidebar layout)
+    ├── dashboard/page.tsx         Dashboard — stats, score trend, top skills
+    ├── resumes/
+    │   ├── page.tsx               Resume library + upload
+    │   └── [id]/build/page.tsx    Resume builder — edit + live preview + export
+    ├── analyze/page.tsx           ATS analysis — run + result
+    ├── history/
+    │   ├── page.tsx               Analysis history list
+    │   └── [id]/page.tsx          Single analysis detail
+    ├── learn/
+    │   ├── page.tsx               Course catalogue
+    │   ├── [courseId]/page.tsx    Course detail + subtopics
+    │   └── [courseId]/[order]/page.tsx  Subtopic content + AI chat
+    └── settings/page.tsx          Profile, appearance, security, plan
+```
+
+All `page.tsx` files are 2-line shells that import and re-export from `components/`. All logic lives under `components/`.
+
+---
+
+## Component Structure
+
+```
+components/
+├── analysis/          ATS analysis feature
+│   ├── hooks/useAnalysis.ts
+│   ├── AnalyzePage.tsx         orchestrator
+│   ├── AnalyzeForm.tsx
+│   ├── ResultView.tsx          GSAP score counter, "Build Updated Resume" button
+│   ├── LoadingView.tsx
+│   ├── ScoreGauge.tsx
+│   ├── SkillsCard.tsx          type="matching"|"missing"
+│   ├── RecommendationsList.tsx
+│   ├── ResumeSelector.tsx
+│   ├── JobDescriptionInput.tsx
+│   └── RecentComparisons.tsx
 │
-├── components/
-│   ├── analysis/               # ATS analysis feature
-│   ├── auth/                   # Login / register forms
-│   ├── dashboard/              # Dashboard widgets
-│   ├── history/                # Analysis history list + detail view
-│   ├── home/                   # Landing page sections
-│   │   ├── HomePage.tsx        # Orchestrator
-│   │   ├── HeroSection.tsx
-│   │   ├── HeroCanvas.tsx      # Three.js + GSAP 3D scene
-│   │   ├── FeaturesSection.tsx
-│   │   ├── HowItWorksSection.tsx
-│   │   ├── CtaSection.tsx
-│   │   ├── HomeNav.tsx
-│   │   └── HomeFooter.tsx
-│   ├── learn/                  # Sahara Academy
-│   │   ├── LearnPage.tsx       # Course grid + filters
-│   │   ├── CourseDetailPage.tsx
-│   │   ├── CourseDetailView.tsx # Subtopic list with per-card Generate button
-│   │   ├── SubtopicDetailPage.tsx
-│   │   ├── SubtopicContentView.tsx # Two-column: content + AI chat sidebar
-│   │   ├── ChatPanel.tsx       # AI Tutor sidebar (RAG-powered)
-│   │   ├── SubtopicsModal.tsx  # AI subtopic generation + edit modal
-│   │   ├── CourseCard.tsx
-│   │   ├── UploadModal.tsx     # Create course (direct S3 upload)
-│   │   ├── FilterBar.tsx
-│   │   ├── hooks/              # useLearn.ts
-│   │   ├── types.ts
-│   │   ├── constants.ts        # COLORS, CARD_STYLE design tokens
-│   │   └── utils.ts
-│   ├── resumes/                # Resume upload + list
-│   ├── settings/               # Profile form
-│   └── ui/                     # shadcn primitives
+├── resumes/           Resume library + builder
+│   ├── hooks/
+│   │   ├── useResumes.ts        upload, delete, polling, viewer state
+│   │   └── useResumeBuilder.ts  structured data, apply recs, export, save
+│   ├── builder/
+│   │   ├── ResumeEditorPanel.tsx    accordion section editor
+│   │   └── ResumeLivePreview.tsx    HTML preview mirroring the PDF layout
+│   ├── ResumesPage.tsx
+│   ├── ResumeBuilderPage.tsx        split-pane: editor + live preview
+│   ├── ResumeLibrary.tsx
+│   ├── ResumeRow.tsx                view / build / delete action buttons
+│   ├── ResumeViewerModal.tsx        iframe modal for original PDF
+│   ├── UploadZone.tsx
+│   └── IndexBadge.tsx
 │
-├── store/
-│   ├── index.ts                # configureStore
-│   ├── hooks.ts                # useAppDispatch / useAppSelector
-│   ├── slices/
-│   │   ├── authSlice.ts
-│   │   └── themeSlice.ts
-│   └── api/
-│       ├── baseApi.ts          # RTK Query base — auth headers, 401 redirect
-│       ├── authApi.ts
-│       ├── resumesApi.ts
-│       ├── analysisApi.ts
-│       └── coursesApi.ts       # All Academy endpoints
+├── dashboard/         Dashboard
+│   ├── hooks/useDashboard.ts    scoreTrend, topSkills, stats
+│   ├── DashboardPage.tsx        GSAP card stagger on load
+│   ├── DashboardGlobe.tsx       Three.js rotating wireframe icosahedron
+│   ├── ScoreTrendWidget.tsx     SVG bar chart — last 5 ATS scores
+│   ├── TopSkillsWidget.tsx      Top 5 skills by frequency
+│   ├── StatCard.tsx
+│   ├── ResumeTable.tsx
+│   └── InsightCard.tsx
 │
-├── lib/
-│   ├── auth.tsx                # useAuth() hook — backed by authSlice
-│   ├── theme.ts                # useTheme() hook — light/dark, persisted
-│   ├── api.ts                  # Axios instance (base URL, credentials)
-│   ├── toast.tsx               # Toast notification helper
-│   └── utils.ts                # cn() and other utilities
-│
-└── proxy.ts                    # Route protection — redirects to /login if no session cookie
+├── history/           Analysis history
+├── learn/             Sahara Academy courses + RAG chat
+├── auth/              Login / Register pages
+├── settings/          Profile, appearance, security, plan
+└── home/              Landing page (Three.js hero, GSAP sections)
 ```
 
 ---
 
-## Setup
+## State Management
 
-**Prerequisites:** Node.js 20+, backend running at `http://localhost:8000`
+All server state goes through **RTK Query**. No `useState + useEffect + fetch` for API data.
+
+```
+store/
+├── index.ts              configureStore
+├── hooks.ts              useAppDispatch / useAppSelector (typed)
+├── slices/
+│   ├── authSlice.ts      user, token, isLoading
+│   └── themeSlice.ts     mode: "light" | "dark"
+└── api/
+    ├── baseApi.ts        createApi — auth header, 401 redirect
+    ├── authApi.ts        login, register, getMe, updateProfile
+    ├── resumesApi.ts     getResumes, upload, delete, view URL, structured,
+    │                     build, export PDF, save customized, customized URL
+    ├── analysisApi.ts    runAnalysis, getHistory, getAnalysisDetail
+    └── coursesApi.ts     courses, subtopics, content, chat
+```
+
+### Cache tags
+
+| Tag | Provided by | Invalidated by |
+|-----|-------------|----------------|
+| `Resume` | `getResumes` | `uploadResume`, `deleteResume`, `saveCustomizedResume` |
+| `Analysis` | `getHistory` | `runAnalysis` |
+| `Me` | `getMe` | `updateProfile` |
+
+---
+
+## Resume Builder Flow
+
+```
+/resumes/[id]/build
+  │
+  ├─ useGetResumeStructuredQuery(id)       GET structured JSON (Gemini parses on first load)
+  ├─ useBuildResumeMutation()              POST recommendations → enhanced JSON
+  ├─ ResumeEditorPanel                    accordion: contact / summary / experience /
+  │                                        education / skills / projects / certifications
+  ├─ ResumeLivePreview                    live HTML preview (updates on every keystroke)
+  ├─ useExportResumePdfMutation()          POST → backend renders PDF → presigned URL → new tab
+  └─ useSaveCustomizedResumeMutation()     POST → backend saves PDF to S3 → "Updated" badge
+```
+
+Coming **from the analysis result**: clicking **Build Updated Resume** navigates to
+`/resumes/[id]/build?recs=[...]&missing=[...]&jd=...` — the builder reads those query params
+and pre-populates the "Apply Recommendations" context.
+
+---
+
+## Design System (Sahara)
+
+Design tokens, typography, spacing, and component patterns are documented in [DESIGN.md](DESIGN.md).
+
+| Token | Value |
+|-------|-------|
+| Brand accent | `#c2652a` |
+| Page background | `#f7f5f3` |
+| Card background | `#ffffff` |
+| Primary text | `#2a2826` |
+| Muted text | `#6e6862` |
+| Card border | `#e4dcd6` |
+
+Heading font: **Playfair Display** (`font-heading` Tailwind class).
+Card style: flat, border-only (`boxShadow: "none"`), `rounded-md`.
+
+---
+
+## Auth
+
+- `useAuth()` from `@/lib/auth` — `{ user, token, isLoading, login, logout }`
+- Backed by `authSlice` (Redux)
+- `AuthInitializer` inside `Providers` hydrates from `localStorage` on mount
+- 401 responses are caught centrally in `baseApi` and redirect to `/login`
+- Route protection: `middleware.ts` checks `rm_access_token` / `rm_refresh_token` cookies
+
+---
+
+## Theme
+
+- `useTheme()` from `@/lib/theme` — `{ mode, isDark, toggle, set }`
+- Persisted to `localStorage` (`rm_theme`), applied as `.dark` on `<html>`
+- Falls back to `prefers-color-scheme` on first load
+
+---
+
+## Local Setup
 
 ```bash
 cd frontend
+
+# Install dependencies
 npm install
+
+# Create .env.local
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+
+# Run dev server
+npm run dev
 ```
 
-Create `frontend/.env.local`:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-```bash
-npm run dev   # http://localhost:3000
-```
-
-The frontend sends requests directly to the Django backend at `NEXT_PUBLIC_API_URL`. Cookies are sent cross-origin via `credentials: "include"` on the Axios instance.
-
----
-
-## Key Features
-
-### ATS Resume Analysis
-- Upload PDF resumes (multipart form POST to Django)
-- Paste a job description → Gemini returns ATS score (0–100), matching skills, missing skills, and recommendations
-- Analysis costs 1 credit (`usesLeft`); the header shows remaining credits
-- Full analysis history with detail view
-
-### Sahara Academy (Learn)
-- **Course grid** with search and category filters
-- **Admin: Create course** — upload source PDF + thumbnail directly to S3 via presigned PUT URL
-- **Subtopic generation** — AI analyses the source PDF and generates a structured subtopic list; async (RabbitMQ worker + polling every 2 s)
-- **Per-subtopic content generation** — each subtopic card has its own Generate button; content includes theory, Mermaid diagrams, code examples, key points, and a 5-question quiz
-- **Content viewer** — two-column layout: scrollable content on the left, AI Tutor sidebar on the right
-- **AI Tutor (RAG chat)** — powered by Gemini with the subtopic content as context; supports multi-turn conversation and quick-suggestion chips
-- **Admin: Edit content** — raw JSON editor with save + re-embed
-
-### Route Protection
-`proxy.ts` (Next.js middleware entry point) checks for `rm_access_token` or `rm_refresh_token` cookies on every navigation. Missing cookies on a protected route redirect to `/login`. Protected routes: `/dashboard`, `/resumes`, `/analyze`, `/learn`, `/history`, `/settings`.
-
-### State Management
-All server state goes through RTK Query. Local `useState` is used only for pure UI state (open/close toggles, form fields before submission, optimistic loading indicators).
-
-Polling pattern used for async operations:
-- Subtopic generation: `pollingInterval: 2000` while `taskId` is set
-- Content status: `pollingInterval: 2000` while any subtopic shows `"generating"`
-
----
-
-## Design System — Sahara
-
-Colors, spacing, and typography follow the Sahara design system defined in `DESIGN.md` and `components/learn/constants.ts`.
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `primary` | `#c2652a` | Buttons, active states, brand accent |
-| `text` | `#2a2826` | Headings and body |
-| `textMuted` | `#6e6862` | Secondary copy |
-| `border` | `#e4dcd6` | Card and input borders |
-| App background | `#f5ede4` | Warm sand page bg |
-| Card background | `#ffffff` | Cards on sand bg |
-
-Heading font: **Playfair Display** (`font-heading`)  
-Body font: **Noto Sans** (`font-sans`)
-
----
-
-## Scripts
-
-```bash
-npm run dev      # Development server with HMR
-npm run build    # Production build
-npm run start    # Serve production build
-npm run lint     # ESLint
-```
+App runs at http://localhost:3000. Requires the Django backend running at port 8000.

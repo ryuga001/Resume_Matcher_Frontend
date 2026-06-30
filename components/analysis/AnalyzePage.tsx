@@ -13,7 +13,14 @@ export function AnalyzePage() {
   } = useAnalysis();
 
   if (view === "loading") return <LoadingView progress={progress} />;
-  if (view === "result" && result) return <ResultView result={result} onReset={resetToForm} />;
+  if (view === "result" && result) return (
+    <ResultView
+      result={result}
+      onReset={resetToForm}
+      resumeId={selectedId ?? undefined}
+      jobDescription={jd}
+    />
+  );
 
   return (
     <AnalyzeForm

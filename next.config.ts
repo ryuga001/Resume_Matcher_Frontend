@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    proxyTimeout: 120_000, // 2 min — subtopic/content generation can be slow
+    proxyTimeout: 120_000, 
   },
   async rewrites() {
     return [

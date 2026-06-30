@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
+import { Wand2 } from "lucide-react";
 import { ScoreGauge } from "./ScoreGauge";
 import { SkillsCard } from "./SkillsCard";
 import { RecommendationsList } from "./RecommendationsList";
@@ -9,11 +11,14 @@ import type { Result } from "./types";
 import { COLORS } from "./constants";
 
 interface ResultViewProps {
-  result:  Result;
-  onReset: () => void;
+  result:         Result;
+  onReset:        () => void;
+  resumeId?:      string;
+  jobDescription?: string;
 }
 
-export function ResultView({ result, onReset }: ResultViewProps) {
+export function ResultView({ result, onReset, resumeId, jobDescription }: ResultViewProps) {
+  const router = useRouter();
   const [displayScore, setDisplayScore] = useState(0);
 
   useEffect(() => {
@@ -27,6 +32,14 @@ export function ResultView({ result, onReset }: ResultViewProps) {
       },
     });
   }, [result.atsScore]);
+
+  function handleBuildResume() {
+    if (!resumeId) return;
+    const recs    = encodeURIComponent(JSON.stringify(result.recommendations ?? []));
+    const missing = encodeURIComponent(JSON.stringify(result.missingSkills ?? []));
+    const jd      = encodeURIComponent(jobDescription ?? "");
+    router.push(`/resumes/${resumeId}/build?recs=${recs}&missing=${missing}&jd=${jd}`);
+  }
 
   return (
     <div className="px-10 py-10">
@@ -50,9 +63,16 @@ export function ResultView({ result, onReset }: ResultViewProps) {
               {result.summary || "Your profile has been compared against the job description. Review the skill breakdown and recommendations below to improve your match score."}
             </p>
             <div className="flex gap-3 flex-wrap">
-              <button className="h-10 px-6 rounded text-white text-sm font-bold hover:opacity-90 transition-all active:scale-[0.97]" style={{ background: COLORS.primary }}>
-                Full Report
-              </button>
+              {resumeId && (
+                <button
+                  onClick={handleBuildResume}
+                  className="h-10 px-6 rounded text-white text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-all active:scale-[0.97]"
+                  style={{ background: COLORS.primary, boxShadow: `0 2px 12px ${COLORS.primaryShadow}` }}
+                >
+                  <Wand2 className="size-4" />
+                  Build Updated Resume
+                </button>
+              )}
               <button className="h-10 px-6 rounded text-sm font-bold border hover:bg-stone-50 transition-colors" style={{ borderColor: COLORS.border, color: COLORS.text }}>
                 Share Result
               </button>
