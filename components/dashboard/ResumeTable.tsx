@@ -27,7 +27,7 @@ export function ResumeTable({ resumes, history, loading }: ResumeTableProps) {
         ))}
       </div>
 
-      <div className="flex flex-col divide-y" style={{ divideColor: COLORS.divideColor }}>
+      <div className="flex flex-col divide-y divide-[#f5ede4]">
         {loading ? (
           [1, 2, 3].map(i => <ResumeTableRow key={i} loading />)
         ) : resumes.length === 0 ? (

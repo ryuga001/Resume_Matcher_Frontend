@@ -8,13 +8,16 @@ Next.js app for AI-powered resume analysis and the Sahara Academy course platfor
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 15+ (App Router) |
+| Framework | Next.js 16 (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 + inline `style={{}}` for design tokens |
 | State / data | Redux Toolkit + RTK Query |
-| UI primitives | shadcn/ui (Radix) |
+| UI primitives | shadcn/ui (Radix UI) |
+| Forms | React Hook Form + Zod |
+| HTTP client | Axios |
 | Design system | Sahara — warm earth tones, Playfair Display headings, Noto Sans body |
 | Icons | Lucide React |
+| 3D / animation | Three.js + GSAP (landing page hero canvas) |
 | Markdown | react-markdown + remark-gfm |
 | Diagrams | Mermaid.js (lazy-loaded) |
 
@@ -30,8 +33,11 @@ frontend/
 │   │   ├── dashboard/          # Overview page
 │   │   ├── resumes/            # Upload & manage resumes
 │   │   ├── analyze/            # ATS analysis
-│   │   ├── history/[id]/       # Analysis history + detail
-│   │   ├── learn/              # Sahara Academy
+│   │   ├── history/            # Analysis history list
+│   │   │   └── [id]/           # Analysis detail
+│   │   ├── learn/              # Sahara Academy — course grid
+│   │   │   ├── [courseId]/     # Course detail + subtopic list
+│   │   │   └── [courseId]/[order]/  # Subtopic content viewer
 │   │   └── settings/           # Profile & password
 │   ├── login/
 │   ├── register/
@@ -42,9 +48,20 @@ frontend/
 │   ├── auth/                   # Login / register forms
 │   ├── dashboard/              # Dashboard widgets
 │   ├── history/                # Analysis history list + detail view
+│   ├── home/                   # Landing page sections
+│   │   ├── HomePage.tsx        # Orchestrator
+│   │   ├── HeroSection.tsx
+│   │   ├── HeroCanvas.tsx      # Three.js + GSAP 3D scene
+│   │   ├── FeaturesSection.tsx
+│   │   ├── HowItWorksSection.tsx
+│   │   ├── CtaSection.tsx
+│   │   ├── HomeNav.tsx
+│   │   └── HomeFooter.tsx
 │   ├── learn/                  # Sahara Academy
 │   │   ├── LearnPage.tsx       # Course grid + filters
+│   │   ├── CourseDetailPage.tsx
 │   │   ├── CourseDetailView.tsx # Subtopic list with per-card Generate button
+│   │   ├── SubtopicDetailPage.tsx
 │   │   ├── SubtopicContentView.tsx # Two-column: content + AI chat sidebar
 │   │   ├── ChatPanel.tsx       # AI Tutor sidebar (RAG-powered)
 │   │   ├── SubtopicsModal.tsx  # AI subtopic generation + edit modal
@@ -74,9 +91,12 @@ frontend/
 │
 ├── lib/
 │   ├── auth.tsx                # useAuth() hook — backed by authSlice
-│   └── theme.tsx               # useTheme() hook — light/dark, persisted
+│   ├── theme.ts                # useTheme() hook — light/dark, persisted
+│   ├── api.ts                  # Axios instance (base URL, credentials)
+│   ├── toast.tsx               # Toast notification helper
+│   └── utils.ts                # cn() and other utilities
 │
-└── middleware.ts               # Route protection → /login if no token
+└── proxy.ts                    # Route protection — redirects to /login if no session cookie
 ```
 
 ---
@@ -100,25 +120,29 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 npm run dev   # http://localhost:3000
 ```
 
-Next.js proxies `/api/*` requests to the Django backend.
+The frontend sends requests directly to the Django backend at `NEXT_PUBLIC_API_URL`. Cookies are sent cross-origin via `credentials: "include"` on the Axios instance.
 
 ---
 
 ## Key Features
 
 ### ATS Resume Analysis
-- Upload PDF resumes (direct S3 presigned PUT)
+- Upload PDF resumes (multipart form POST to Django)
 - Paste a job description → Gemini returns ATS score (0–100), matching skills, missing skills, and recommendations
+- Analysis costs 1 credit (`usesLeft`); the header shows remaining credits
 - Full analysis history with detail view
 
 ### Sahara Academy (Learn)
 - **Course grid** with search and category filters
-- **Admin: Create course** — upload source PDF + thumbnail directly to S3
-- **Subtopic generation** — AI analyses the source PDF and generates a structured subtopic list; async (Celery + polling)
+- **Admin: Create course** — upload source PDF + thumbnail directly to S3 via presigned PUT URL
+- **Subtopic generation** — AI analyses the source PDF and generates a structured subtopic list; async (RabbitMQ worker + polling every 2 s)
 - **Per-subtopic content generation** — each subtopic card has its own Generate button; content includes theory, Mermaid diagrams, code examples, key points, and a 5-question quiz
 - **Content viewer** — two-column layout: scrollable content on the left, AI Tutor sidebar on the right
 - **AI Tutor (RAG chat)** — powered by Gemini with the subtopic content as context; supports multi-turn conversation and quick-suggestion chips
 - **Admin: Edit content** — raw JSON editor with save + re-embed
+
+### Route Protection
+`proxy.ts` (Next.js middleware entry point) checks for `rm_access_token` or `rm_refresh_token` cookies on every navigation. Missing cookies on a protected route redirect to `/login`. Protected routes: `/dashboard`, `/resumes`, `/analyze`, `/learn`, `/history`, `/settings`.
 
 ### State Management
 All server state goes through RTK Query. Local `useState` is used only for pure UI state (open/close toggles, form fields before submission, optimistic loading indicators).
