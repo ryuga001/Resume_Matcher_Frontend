@@ -101,7 +101,7 @@ export function ChatPanel({ courseId, order, subtopicTitle }: Props) {
           onClick={() => setOpen(true)}
         >
           <div
-            className="size-8 rounded-xl flex items-center justify-center"
+            className="size-8 rounded-md flex items-center justify-center"
             style={{ background: COLORS.primaryLight }}
           >
             <Bot className="size-4" style={{ color: COLORS.primary }} strokeWidth={1.8} />
@@ -136,7 +136,7 @@ export function ChatPanel({ courseId, order, subtopicTitle }: Props) {
             style={{ borderColor: COLORS.border, background: "#ffffff" }}
           >
             <div
-              className="size-10 rounded-xl flex items-center justify-center shrink-0"
+              className="size-10 rounded-md flex items-center justify-center shrink-0"
               style={{ background: COLORS.primaryLight }}
             >
               <Bot className="size-5" style={{ color: COLORS.primary }} strokeWidth={1.5} />
@@ -225,7 +225,7 @@ export function ChatPanel({ courseId, order, subtopicTitle }: Props) {
             style={{ borderColor: COLORS.border, background: "#ffffff" }}
           >
             <div
-              className="flex items-end gap-2 rounded-xl border p-2"
+              className="flex items-end gap-2 rounded-md border p-2"
               style={{ borderColor: COLORS.border, background: COLORS.bg }}
             >
               <textarea
@@ -241,7 +241,7 @@ export function ChatPanel({ courseId, order, subtopicTitle }: Props) {
               <button
                 onClick={() => send()}
                 disabled={!input.trim() || isLoading}
-                className="size-9 flex items-center justify-center rounded-xl text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                className="size-9 flex items-center justify-center rounded-md text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 style={{ background: COLORS.primary }}
               >
                 {isLoading
@@ -256,7 +256,7 @@ export function ChatPanel({ courseId, order, subtopicTitle }: Props) {
                   key={s}
                   onClick={() => send(s)}
                   disabled={isLoading}
-                  className="text-[10px] font-bold px-3 py-1.5 rounded-full border transition-colors hover:border-[#c2652a] hover:text-[#c2652a] disabled:opacity-40"
+                  className="text-[10px] font-bold px-3 py-1.5 rounded border transition-colors hover:border-[#c2652a] hover:text-[#c2652a] disabled:opacity-40"
                   style={{ borderColor: COLORS.border, color: COLORS.textMuted }}
                 >
                   {s}

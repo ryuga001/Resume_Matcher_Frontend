@@ -29,7 +29,7 @@ export function ProfileSection({ user, name, setName, nameLoading, nameSaved, on
         <User className="size-5" style={{ color: "#c2652a" }} strokeWidth={1.8} />
         <h3 className="font-heading text-2xl font-bold" style={{ color: "#2a2826" }}>Profile</h3>
       </div>
-      <div className="bg-white rounded-xl p-6 border" style={SECTION_CARD_STYLE}>
+      <div className="bg-white rounded-md p-6 border" style={SECTION_CARD_STYLE}>
         <div className="flex flex-col md:flex-row gap-8">
           <div className="flex flex-col items-center gap-3 shrink-0">
             <div
@@ -67,7 +67,7 @@ export function ProfileSection({ user, name, setName, nameLoading, nameSaved, on
                 <button
                   type="submit"
                   disabled={nameLoading || !name.trim() || name === user?.name}
-                  className="shrink-0 h-10 px-5 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="shrink-0 h-10 px-5 rounded text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
                   style={{ background: nameSaved ? "#2d8a4e" : "#c2652a", boxShadow: "0 2px 8px rgba(194,101,42,0.20)" }}
                 >
                   {nameLoading && <Loader2 className="size-3.5 animate-spin" />}

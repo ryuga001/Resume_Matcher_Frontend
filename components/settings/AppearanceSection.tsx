@@ -13,14 +13,14 @@ export function AppearanceSection() {
         <Palette className="size-5" style={{ color: "#c2652a" }} strokeWidth={1.8} />
         <h3 className="font-heading text-2xl font-bold" style={{ color: "#3a302a" }}>Appearance</h3>
       </div>
-      <div className="bg-white rounded-xl p-6 border" style={SECTION_CARD_STYLE}>
+      <div className="bg-white rounded-md p-6 border" style={SECTION_CARD_STYLE}>
         <p className="text-[10px] font-bold uppercase tracking-[0.14em] mb-4" style={{ color: "#9e8e84" }}>
           Theme
         </p>
         <div className="flex gap-3">
           <button
             onClick={() => set("light")}
-            className="flex items-center gap-2.5 h-10 px-5 rounded-lg border text-sm font-semibold transition-all"
+            className="flex items-center gap-2.5 h-10 px-5 rounded border text-sm font-semibold transition-all"
             style={
               !isDark
                 ? { background: "rgba(194,101,42,0.08)", borderColor: "#c2652a", color: "#c2652a" }
@@ -32,7 +32,7 @@ export function AppearanceSection() {
           </button>
           <button
             onClick={() => set("dark")}
-            className="flex items-center gap-2.5 h-10 px-5 rounded-lg border text-sm font-semibold transition-all"
+            className="flex items-center gap-2.5 h-10 px-5 rounded border text-sm font-semibold transition-all"
             style={
               isDark
                 ? { background: "rgba(194,101,42,0.08)", borderColor: "#c2652a", color: "#c2652a" }

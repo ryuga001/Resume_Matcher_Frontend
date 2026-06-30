@@ -24,7 +24,7 @@ export function ResumeLibrary({
     return (
       <div>
         <p className="text-[10px] font-bold uppercase tracking-[0.14em] mb-3" style={{ color: "#9e8e84" }}>Your library</p>
-        <div className="bg-white border rounded-xl divide-y overflow-hidden" style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+        <div className="bg-white border rounded-md divide-y overflow-hidden" style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "none" }}>
           {[1, 2].map((i) => (
             <div key={i} className="flex items-center gap-4 px-5 py-3">
               <Skeleton className="size-8 rounded-lg" />
@@ -32,7 +32,7 @@ export function ResumeLibrary({
                 <Skeleton className="h-4 w-48 mb-1.5" />
                 <Skeleton className="h-3 w-24" />
               </div>
-              <Skeleton className="h-5 w-14 rounded-full" />
+              <Skeleton className="h-5 w-14 rounded" />
             </div>
           ))}
         </div>
@@ -52,7 +52,7 @@ export function ResumeLibrary({
           </span>
         )}
       </div>
-      <div className="bg-white border rounded-xl divide-y overflow-hidden" style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+      <div className="bg-white border rounded-md divide-y overflow-hidden" style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "none" }}>
         {resumes.map((r) => (
           <ResumeRow
             key={r.resumeId}

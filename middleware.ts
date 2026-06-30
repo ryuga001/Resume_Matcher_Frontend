@@ -8,7 +8,7 @@ function isPublic(pathname: string): boolean {
   return false;
 }
 
-export function proxy(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (isPublic(pathname)) {
@@ -18,7 +18,7 @@ export function proxy(req: NextRequest) {
   const isProtected = PROTECTED.some((p) => pathname === p || pathname.startsWith(p + "/"));
   if (!isProtected) return NextResponse.next();
 
- const hasSession =
+  const hasSession =
     req.cookies.get("rm_access_token")?.value ||
     req.cookies.get("rm_refresh_token")?.value;
 

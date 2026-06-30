@@ -43,7 +43,7 @@ export function LearnPage() {
         {isAdmin && (
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 h-10 px-5 rounded-lg text-sm font-bold text-white shrink-0 transition-all hover:opacity-90 active:scale-[0.98] ml-6 mt-1"
+            className="flex items-center gap-2 h-10 px-5 rounded text-sm font-bold text-white shrink-0 transition-all hover:opacity-90 active:scale-[0.98] ml-6 mt-1"
             style={{ background: COLORS.primary, boxShadow: `0 4px 20px ${COLORS.primaryShadow}` }}
           >
             <Plus className="size-4" strokeWidth={2.5} />
@@ -79,7 +79,7 @@ export function LearnPage() {
           {isAdmin && !search && !category && !statusFilter && (
             <button
               onClick={openCreate}
-              className="mt-2 h-9 px-5 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90"
+              className="mt-2 h-9 px-5 rounded text-sm font-bold text-white transition-all hover:opacity-90"
               style={{ background: COLORS.primary }}
             >
               Add the first course
@@ -108,7 +108,7 @@ export function LearnPage() {
       {/* Featured path banner */}
       {!isLoading && courses.length > 0 && (
         <div
-          className="mt-12 rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden"
+          className="mt-12 rounded-md p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden"
           style={{ background: COLORS.primary }}
         >
           <div className="absolute inset-0 opacity-10 pointer-events-none">
@@ -132,13 +132,13 @@ export function LearnPage() {
             <p className="text-sm text-white/80 mb-6 max-w-md leading-relaxed">
               A curated sequence of modules designed to transform senior professionals into strategic leaders.
             </p>
-            <button className="h-10 px-6 rounded-lg bg-white text-sm font-bold transition-all hover:scale-105 active:scale-95" style={{ color: COLORS.primary }}>
+            <button className="h-10 px-6 rounded bg-white text-sm font-bold transition-all hover:scale-105 active:scale-95" style={{ color: COLORS.primary }}>
               Explore Path
             </button>
           </div>
 
           <div className="relative z-10 shrink-0">
-            <div className="w-36 h-36 rounded-2xl flex flex-col items-center justify-center text-center border border-white/20 bg-white/10 backdrop-blur-sm">
+            <div className="w-36 h-36 rounded-md flex flex-col items-center justify-center text-center border border-white/20 bg-white/10 backdrop-blur-sm">
               <GraduationCap className="size-8 text-white mb-2" strokeWidth={1.5} />
               <span className="font-heading text-3xl text-white">{courses.length}</span>
               <span className="text-[10px] text-white/70 uppercase tracking-widest">

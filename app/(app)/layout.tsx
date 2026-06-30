@@ -15,8 +15,9 @@ import {
   X
 } from "lucide-react";
 import Link from "next/link";
+import { gsap } from "gsap";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const NAV = [
   { href: "/dashboard",  label: "Dashboard",     icon: LayoutDashboard },
@@ -30,6 +31,28 @@ const NAV = [
 function Sidebar({ onClose }: { onClose?: () => void }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const links = Array.from(nav.querySelectorAll("a"));
+
+    const handlers: Array<{ el: Element; enter: () => void; leave: () => void }> = links.map((el) => {
+      const enter = () => gsap.to(el, { scale: 1.02, duration: 0.15, ease: "power1.out" });
+      const leave = () => gsap.to(el, { scale: 1, duration: 0.15, ease: "power1.out" });
+      el.addEventListener("mouseenter", enter);
+      el.addEventListener("mouseleave", leave);
+      return { el, enter, leave };
+    });
+
+    return () => {
+      handlers.forEach(({ el, enter, leave }) => {
+        el.removeEventListener("mouseenter", enter);
+        el.removeEventListener("mouseleave", leave);
+      });
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-full" style={{ background: "#ffffff" }}>
@@ -44,7 +67,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-2 flex flex-col gap-0.5 overflow-y-auto">
+      <nav ref={navRef} className="flex-1 px-3 py-2 flex flex-col gap-0.5 overflow-y-auto">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active =
             pathname === href ||
@@ -73,7 +96,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Pro upgrade */}
-      <div className="mx-3 mb-3 rounded-xl p-4 shrink-0" style={{ background: "#f5ede4" }}>
+      <div className="mx-3 mb-3 rounded-md p-4 shrink-0" style={{ background: "#f7f5f3" }}>
         <p className="text-[9px] font-bold uppercase tracking-[0.14em] mb-1.5" style={{ color: "#c2652a" }}>
           Pro Access
         </p>
@@ -81,7 +104,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           Unlock advanced ATS deep-scans.
         </p>
         <button
-          className="w-full h-8 rounded-lg text-xs font-bold text-white transition-all hover:opacity-90 active:scale-[0.97]"
+          className="w-full h-8 rounded text-xs font-bold text-white transition-all hover:opacity-90 active:scale-[0.97]"
           style={{ background: "#c2652a" }}
         >
           Upgrade to Pro
@@ -104,7 +127,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           <button
             onClick={logout}
             title="Sign out"
-            className="shrink-0 size-8 flex items-center justify-center rounded-lg transition-colors hover:bg-stone-100"
+            className="shrink-0 size-8 flex items-center justify-center rounded transition-colors hover:bg-stone-100"
             style={{ color: "#9e8e84" }}
           >
             <LogOut className="size-4" strokeWidth={1.8} />
@@ -130,7 +153,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f5ede4" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f7f5f3" }}>
         <Loader2 className="size-5 animate-spin" style={{ color: "#c2652a" }} />
       </div>
     );
@@ -138,7 +161,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="h-screen flex overflow-hidden" style={{ background: "#f5ede4" }}>
+    <div className="h-screen flex overflow-hidden" style={{ background: "#f7f5f3" }}>
       {/* Desktop sidebar — fixed height, never scrolls */}
       <aside className="hidden md:flex w-[220px] shrink-0 flex-col border-r h-screen" style={{ borderColor: "#ede8e3", background: "#ffffff" }}>
         <Sidebar />

@@ -3,7 +3,7 @@ export function SocialButtons() {
     <div className="grid grid-cols-2 gap-3">
       <button
         type="button"
-        className="h-11 flex items-center justify-center gap-2 rounded-xl border text-sm font-semibold transition-colors hover:bg-stone-50 active:scale-[0.97]"
+        className="h-11 flex items-center justify-center gap-2 rounded-md border text-sm font-semibold transition-colors hover:bg-stone-50 active:scale-[0.97]"
         style={{ borderColor: "#e4dcd6", color: "#2a2826" }}
       >
         <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none">
@@ -16,7 +16,7 @@ export function SocialButtons() {
       </button>
       <button
         type="button"
-        className="h-11 flex items-center justify-center gap-2 rounded-xl border text-sm font-semibold transition-colors hover:bg-stone-50 active:scale-[0.97]"
+        className="h-11 flex items-center justify-center gap-2 rounded-md border text-sm font-semibold transition-colors hover:bg-stone-50 active:scale-[0.97]"
         style={{ borderColor: "#e4dcd6", color: "#2a2826" }}
       >
         <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">

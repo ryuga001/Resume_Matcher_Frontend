@@ -36,7 +36,7 @@ export function AnalyzeForm({
         </header>
 
         {error && (
-          <div className="mb-6 px-4 py-3 rounded-xl text-sm" style={{ background: "#fce4e0", color: "#8c3c3c" }}>{error}</div>
+          <div className="mb-6 px-4 py-3 rounded-md text-sm" style={{ background: "#fce4e0", color: "#8c3c3c" }}>{error}</div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
@@ -53,7 +53,7 @@ export function AnalyzeForm({
           <button
             onClick={onSubmit}
             disabled={!canSubmit}
-            className="h-14 px-12 rounded-xl text-white font-bold flex items-center gap-3 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="h-14 px-12 rounded text-white font-bold flex items-center gap-3 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: COLORS.primary, boxShadow: `0 4px 20px ${COLORS.primaryShadow}` }}
           >
             <Zap className="size-5" strokeWidth={2} />

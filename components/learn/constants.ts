@@ -22,6 +22,6 @@ export const COURSE_CATEGORIES = [
 export const COURSE_STATUS_OPTIONS = ["Not Available", "Available"] as const;
 
 export const CARD_STYLE = {
-  borderColor: "rgba(212,200,192,0.5)",
-  boxShadow: "0 2px 16px rgba(58,48,42,0.04)",
+  borderColor: "#e4dcd6",
+  boxShadow: "none",
 } as const;

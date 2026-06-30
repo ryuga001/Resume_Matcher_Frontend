@@ -21,8 +21,8 @@ export function AuthRightPanel({ children }: AuthRightPanelProps) {
           Sahara
         </Link>
         <div
-          className="bg-white rounded-2xl px-8 py-9"
-          style={{ boxShadow: "0 4px 32px -4px rgba(194,101,42,0.12), 0 1px 4px rgba(0,0,0,0.06)" }}
+          className="bg-white rounded-md px-8 py-9"
+          style={{ boxShadow: "none" }}
         >
           {children}
         </div>

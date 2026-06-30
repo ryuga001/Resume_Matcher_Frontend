@@ -27,7 +27,7 @@ export function SkillsCard({ type, skills }: SkillsCardProps) {
   const { icon, title, emptyText, badgeStyle } = CONFIG[type];
 
   return (
-    <div className="bg-white rounded-xl p-8 border" style={{ borderColor: COLORS.borderMuted, boxShadow: "0 2px 16px rgba(58,48,42,0.04)" }}>
+    <div className="bg-white rounded-md p-8 border" style={{ borderColor: COLORS.borderMuted, boxShadow: "none" }}>
       <div className="flex items-center gap-3 mb-6">
         {icon}
         <h4 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>{title}</h4>
@@ -37,7 +37,7 @@ export function SkillsCard({ type, skills }: SkillsCardProps) {
         : (
           <div className="flex flex-wrap gap-2">
             {skills.map(s => (
-              <span key={s} className="px-4 py-1.5 rounded-full text-xs font-bold" style={badgeStyle}>{s}</span>
+              <span key={s} className="px-4 py-1.5 rounded text-xs font-bold" style={badgeStyle}>{s}</span>
             ))}
           </div>
         )

@@ -18,7 +18,7 @@ export function LoadingView({ progress }: LoadingViewProps) {
     <div className="flex-1 flex items-center justify-center px-8 py-20 min-h-[80vh]">
       <style>{LOADING_STYLES}</style>
       <div
-        className="w-full max-w-xl rounded-[32px] p-16 flex flex-col items-center text-center"
+        className="w-full max-w-xl rounded-md p-16 flex flex-col items-center text-center"
         style={{ background: "#ffffff", boxShadow: "0 4px 32px rgba(58,48,42,0.07)" }}
       >
         <div className="relative mb-12">

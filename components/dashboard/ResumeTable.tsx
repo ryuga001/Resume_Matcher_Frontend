@@ -11,7 +11,7 @@ type ResumeTableProps = {
 
 export function ResumeTable({ resumes, history, loading }: ResumeTableProps) {
   return (
-    <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+    <div className="bg-white rounded-md p-6 border" style={{ borderColor: COLORS.borderColor, boxShadow: "none" }}>
       <div className="flex items-center justify-between mb-5">
         <h2 className="font-heading text-lg font-bold" style={{ color: COLORS.textPrimary }}>Recent Resumes</h2>
         <Link href="/resumes" className="text-sm font-semibold hover:underline" style={{ color: COLORS.accent }}>
@@ -19,15 +19,15 @@ export function ResumeTable({ resumes, history, loading }: ResumeTableProps) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-[1fr_160px_80px_120px] gap-2 px-1 mb-3">
+      <div className="grid grid-cols-[1fr_80px_100px_120px] gap-2 px-1 mb-3">
         {TABLE_COLUMNS.map(col => (
-          <span key={col} className="text-[9px] font-bold uppercase tracking-[0.12em]" style={{ color: COLORS.textMuted }}>
+          <span key={col} className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: COLORS.textMuted }}>
             {col}
           </span>
         ))}
       </div>
 
-      <div className="flex flex-col divide-y divide-[#f5ede4]">
+      <div className="flex flex-col divide-y divide-[#f7f5f3]">
         {loading ? (
           [1, 2, 3].map(i => <ResumeTableRow key={i} loading />)
         ) : resumes.length === 0 ? (
@@ -39,12 +39,13 @@ export function ResumeTable({ resumes, history, loading }: ResumeTableProps) {
           </div>
         ) : (
           resumes.map(r => {
-            const matchedHistory = history.find(h => h.resumeName === r.fileName);
+            const bestScore = history.filter(h => h.resumeName === r.fileName)
+              .reduce((best: number | null, h) => best === null ? h.atsScore : Math.max(best, h.atsScore), null);
             return (
               <ResumeTableRow
                 key={r.resumeId}
                 resume={r}
-                matchedScore={matchedHistory?.atsScore ?? null}
+                matchedScore={bestScore}
               />
             );
           })

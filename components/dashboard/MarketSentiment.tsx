@@ -2,7 +2,7 @@ import { COLORS, MARKET_SENTIMENT } from "@/components/dashboard/constants";
 
 export function MarketSentiment() {
   return (
-    <div className="rounded-2xl p-6" style={{ background: COLORS.darkCardBg, boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}>
+    <div className="rounded-md p-6" style={{ background: COLORS.darkCardBg, boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}>
       <h3 className="font-heading text-base font-bold mb-5" style={{ color: COLORS.darkCardText }}>
         Market Sentiment
       </h3>

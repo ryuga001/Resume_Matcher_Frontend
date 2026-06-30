@@ -85,7 +85,7 @@ function FileDropZone({
           const f = e.dataTransfer.files[0];
           if (f) onChange(f);
         }}
-        className="flex flex-col items-center justify-center gap-2 p-5 rounded-lg border-2 border-dashed cursor-pointer transition-all"
+        className="flex flex-col items-center justify-center gap-2 p-5 rounded border-2 border-dashed cursor-pointer transition-all"
         style={{
           borderColor: dragging ? COLORS.primary : COLORS.border,
           background:  dragging ? COLORS.primaryLight : "transparent",
@@ -230,7 +230,7 @@ export function UploadModal({ open, onClose, editCourse }: Props) {
 
       {/* Panel */}
       <div
-        className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-xl bg-white rounded-md shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
         style={{ boxShadow: "0 4px 32px rgba(58,48,42,0.14)" }}
       >
         {/* Header */}
@@ -241,7 +241,7 @@ export function UploadModal({ open, onClose, editCourse }: Props) {
           {!isBusy && (
             <button
               onClick={onClose}
-              className="size-8 flex items-center justify-center rounded-lg transition-colors hover:bg-stone-100"
+              className="size-8 flex items-center justify-center rounded transition-colors hover:bg-stone-100"
               style={{ color: COLORS.textFaint }}
             >
               <X className="size-4" strokeWidth={2} />
@@ -260,7 +260,7 @@ export function UploadModal({ open, onClose, editCourse }: Props) {
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="e.g. Advanced System Design"
-              className="w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none transition-all"
+              className="w-full px-4 py-2.5 rounded border text-sm focus:outline-none transition-all"
               style={{ borderColor: COLORS.border, color: COLORS.text }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = COLORS.primary;
@@ -286,7 +286,7 @@ export function UploadModal({ open, onClose, editCourse }: Props) {
                     key={cat}
                     type="button"
                     onClick={() => toggleCategory(cat)}
-                    className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.1em] border transition-all"
+                    className="px-3 py-1 rounded text-[10px] font-bold uppercase tracking-[0.1em] border transition-all"
                     style={selected
                       ? { background: COLORS.primary, color: "#fff", borderColor: COLORS.primary }
                       : { background: "transparent", color: COLORS.textMuted, borderColor: COLORS.border }
@@ -310,7 +310,7 @@ export function UploadModal({ open, onClose, editCourse }: Props) {
                   key={s}
                   type="button"
                   onClick={() => setStatus(s)}
-                  className="flex-1 py-2.5 rounded-lg border text-xs font-bold transition-all"
+                  className="flex-1 py-2.5 rounded border text-xs font-bold transition-all"
                   style={status === s
                     ? { background: COLORS.primary, color: "#fff", borderColor: COLORS.primary }
                     : { background: "transparent", color: COLORS.textMuted, borderColor: COLORS.border }
@@ -359,7 +359,7 @@ export function UploadModal({ open, onClose, editCourse }: Props) {
             type="button"
             onClick={onClose}
             disabled={isBusy}
-            className="h-10 px-5 rounded-lg text-sm font-bold border transition-colors hover:bg-stone-50 disabled:opacity-40"
+            className="h-10 px-5 rounded text-sm font-bold border transition-colors hover:bg-stone-50 disabled:opacity-40"
             style={{ borderColor: COLORS.border, color: COLORS.text }}
           >
             Cancel
@@ -367,7 +367,7 @@ export function UploadModal({ open, onClose, editCourse }: Props) {
           <button
             onClick={handleSubmit}
             disabled={isBusy}
-            className="flex-1 h-10 rounded-lg text-sm font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 h-10 rounded text-sm font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: COLORS.primary, boxShadow: `0 4px 20px ${COLORS.primaryShadow}` }}
           >
             {isBusy ? (

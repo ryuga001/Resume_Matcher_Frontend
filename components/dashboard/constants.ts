@@ -1,5 +1,5 @@
 export const COLORS = {
-  background: "#f5ede4",
+  background: "#f7f5f3",
   textPrimary: "#2a2826",
   textSecondary: "#6e6862",
   textMuted: "#9e8e84",
@@ -16,7 +16,7 @@ export const COLORS = {
   scoreGood: "#2d8a4e",
   scoreMid: "#c2652a",
   scoreBad: "#b3261e",
-  divideColor: "#f5ede4",
+  divideColor: "#f7f5f3",
 };
 
 export const MARKET_SENTIMENT = [
@@ -24,7 +24,7 @@ export const MARKET_SENTIMENT = [
   { label: "Salary Benchmark", value: "+12% Trend", pct: 55 },
 ];
 
-export const TABLE_COLUMNS = ["Document Name", "Target Role", "Score", "Status"];
+export const TABLE_COLUMNS = ["Document", "ATS Score", "Date", "Status"];
 
 export const FOOTER_LINKS = ["Privacy Policy", "Terms of Service", "Contact", "Careers"];
 

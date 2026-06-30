@@ -34,17 +34,17 @@ export function HistoryDetailPage() {
 
       {loading && (
         <div className="flex flex-col gap-6">
-          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-md" />
           <div className="grid grid-cols-2 gap-6">
-            <Skeleton className="h-40 rounded-xl" />
-            <Skeleton className="h-40 rounded-xl" />
+            <Skeleton className="h-40 rounded-md" />
+            <Skeleton className="h-40 rounded-md" />
           </div>
         </div>
       )}
       {error && <p className="text-sm" style={{ color: "#b3261e" }}>{error}</p>}
       {detail && (
         <div className="flex flex-col gap-6 fade-up">
-          <div className="bg-white border rounded-xl p-8" style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "0 2px 16px rgba(58,48,42,0.04)" }}>
+          <div className="bg-white border rounded-md p-8" style={{ borderColor: "rgba(212,200,192,0.5)", boxShadow: "none" }}>
             <ScoreArc score={Math.round(detail.atsScore)} />
             {detail.summary && (
               <p className="text-sm leading-relaxed mt-4 sm:ml-[calc(148px+1.25rem)]" style={{ color: "#6e6862" }}>

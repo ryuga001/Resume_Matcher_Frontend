@@ -34,7 +34,7 @@ type RowProps = {
 function SubtopicRow({ topic, index, total, onChange, onMove }: RowProps) {
   return (
     <div
-      className="flex items-center gap-3 py-2 px-3 rounded-xl border group"
+      className="flex items-center gap-3 py-2 px-3 rounded-md border group"
       style={{ borderColor: COLORS.borderFaint, background: "#fdfcfb" }}
     >
       {/* Order badge */}
@@ -60,7 +60,7 @@ function SubtopicRow({ topic, index, total, onChange, onMove }: RowProps) {
             key={d}
             type="button"
             onClick={() => onChange({ ...topic, difficulty: d })}
-            className="px-2.5 py-1 rounded-full text-[10px] font-bold transition-all"
+            className="px-2.5 py-1 rounded text-[10px] font-bold transition-all"
             style={
               topic.difficulty === d
                 ? DIFFICULTY_COLORS[d]
@@ -194,7 +194,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={!isBusy ? onClose : undefined} />
 
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[88vh]"
+        className="relative w-full max-w-2xl bg-white rounded-md shadow-2xl flex flex-col max-h-[88vh]"
         style={{ boxShadow: "0 4px 32px rgba(58,48,42,0.14)" }}
       >
         {/* Header */}
@@ -209,7 +209,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
           <button
             onClick={onClose}
             disabled={isBusy}
-            className="size-8 flex items-center justify-center rounded-lg transition-colors hover:bg-stone-100 disabled:opacity-40"
+            className="size-8 flex items-center justify-center rounded transition-colors hover:bg-stone-100 disabled:opacity-40"
             style={{ color: COLORS.textFaint }}
           >
             <X className="size-4" strokeWidth={2} />
@@ -222,7 +222,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
           {subtopics.length === 0 && !isGenerating && (
             <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
               <div
-                className="size-14 rounded-xl flex items-center justify-center"
+                className="size-14 rounded-md flex items-center justify-center"
                 style={{ background: COLORS.primaryLight }}
               >
                 <Sparkles className="size-7" style={{ color: COLORS.primary }} strokeWidth={1.5} />
@@ -235,7 +235,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
               </div>
               <button
                 onClick={handleGenerate}
-                className="flex items-center gap-2 h-10 px-6 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90"
+                className="flex items-center gap-2 h-10 px-6 rounded text-sm font-bold text-white transition-all hover:opacity-90"
                 style={{ background: COLORS.primary, boxShadow: `0 4px 20px ${COLORS.primaryShadow}` }}
               >
                 <Sparkles className="size-4" strokeWidth={2} />
@@ -263,7 +263,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
                 </span>
                 <button
                   onClick={handleGenerate}
-                  className="flex items-center gap-1.5 h-7 px-3 rounded-lg text-[10px] font-bold border transition-colors hover:bg-stone-50"
+                  className="flex items-center gap-1.5 h-7 px-3 rounded text-[10px] font-bold border transition-colors hover:bg-stone-50"
                   style={{ borderColor: COLORS.border, color: COLORS.primary }}
                 >
                   <Sparkles className="size-3" strokeWidth={2} />
@@ -293,7 +293,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
                   <button
                     onClick={() => setPage((p) => p - 1)}
                     disabled={page === 0}
-                    className="size-8 flex items-center justify-center rounded-lg border transition-colors hover:bg-stone-50 disabled:opacity-30"
+                    className="size-8 flex items-center justify-center rounded border transition-colors hover:bg-stone-50 disabled:opacity-30"
                     style={{ borderColor: COLORS.border }}
                   >
                     <ChevronLeft className="size-4" style={{ color: COLORS.text }} strokeWidth={2} />
@@ -304,7 +304,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
                   <button
                     onClick={() => setPage((p) => p + 1)}
                     disabled={page === totalPages - 1}
-                    className="size-8 flex items-center justify-center rounded-lg border transition-colors hover:bg-stone-50 disabled:opacity-30"
+                    className="size-8 flex items-center justify-center rounded border transition-colors hover:bg-stone-50 disabled:opacity-30"
                     style={{ borderColor: COLORS.border }}
                   >
                     <ChevronRight className="size-4" style={{ color: COLORS.text }} strokeWidth={2} />
@@ -330,7 +330,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
               type="button"
               onClick={onClose}
               disabled={isBusy}
-              className="h-10 px-5 rounded-lg text-sm font-bold border transition-colors hover:bg-stone-50 disabled:opacity-40"
+              className="h-10 px-5 rounded text-sm font-bold border transition-colors hover:bg-stone-50 disabled:opacity-40"
               style={{ borderColor: COLORS.border, color: COLORS.text }}
             >
               Cancel
@@ -338,7 +338,7 @@ export function SubtopicsModal({ open, onClose, course }: Props) {
             <button
               onClick={handleSave}
               disabled={isBusy || saved}
-              className="flex-1 h-10 rounded-lg text-sm font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+              className="flex-1 h-10 rounded text-sm font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
               style={{ background: saved ? COLORS.scoreGood : COLORS.primary, boxShadow: `0 4px 20px ${COLORS.primaryShadow}` }}
             >
               {isSaving ? (

@@ -77,14 +77,14 @@ export function RegisterPage() {
             onToggleShow={() => setShowPw(v => !v)}
           />
           {error && (
-            <p className="text-sm rounded-lg px-3 py-2" style={{ color: "#b3261e", background: "rgba(179,38,30,0.07)" }}>
+            <p className="text-sm rounded px-3 py-2" style={{ color: "#b3261e", background: "rgba(179,38,30,0.07)" }}>
               {error}
             </p>
           )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-12 rounded-xl text-white text-sm font-bold tracking-wide transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60 mt-1"
+            className="w-full h-12 rounded-md text-white text-sm font-bold tracking-wide transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60 mt-1"
             style={{ background: "#c2652a" }}
           >
             {loading && <Loader2 className="size-4 animate-spin" />}

@@ -10,13 +10,13 @@ interface RecommendationsListProps {
 
 export function RecommendationsList({ recommendations }: RecommendationsListProps) {
   return (
-    <div className="bg-white rounded-xl p-10 border" style={{ borderColor: COLORS.borderMuted, boxShadow: "0 2px 16px rgba(58,48,42,0.04)" }}>
+    <div className="bg-white rounded-md p-10 border" style={{ borderColor: COLORS.borderMuted, boxShadow: "none" }}>
       <h4 className="font-heading text-3xl font-bold mb-8" style={{ color: COLORS.text }}>Recommendations</h4>
       <div className="space-y-6">
         {recommendations.map((rec, i) => (
           <div key={i} className="flex gap-5">
             <span
-              className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+              className="shrink-0 w-8 h-8 rounded flex items-center justify-center text-sm font-bold"
               style={{ background: "#fbe8d8", color: COLORS.primary }}
             >
               {i + 1}
@@ -31,9 +31,9 @@ export function RecommendationsList({ recommendations }: RecommendationsListProp
         ))}
       </div>
 
-      <div className="mt-8 p-5 rounded-xl flex items-center justify-between gap-4" style={{ background: COLORS.bgSurface }}>
+      <div className="mt-8 p-5 rounded-md flex items-center justify-between gap-4" style={{ background: COLORS.bgSurface }}>
         <div className="flex items-center gap-4">
-          <div className="size-11 rounded-xl flex items-center justify-center bg-white border shrink-0" style={{ borderColor: COLORS.border }}>
+          <div className="size-11 rounded-md flex items-center justify-center bg-white border shrink-0" style={{ borderColor: COLORS.border }}>
             <Zap className="size-5" style={{ color: COLORS.primary }} strokeWidth={1.5} />
           </div>
           <div>
@@ -42,7 +42,7 @@ export function RecommendationsList({ recommendations }: RecommendationsListProp
           </div>
         </div>
         <button
-          className="shrink-0 h-10 px-5 rounded-lg text-sm font-bold text-white hover:opacity-90 transition-all"
+          className="shrink-0 h-10 px-5 rounded text-sm font-bold text-white hover:opacity-90 transition-all"
           style={{ background: COLORS.text }}
         >
           Auto-Optimize Resume

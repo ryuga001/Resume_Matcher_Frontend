@@ -32,7 +32,7 @@ function AdminMenu({ course, onEdit, onSubtopics, onDelete }: Pick<Props, "cours
     <div ref={ref} className="relative">
       <button
         onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-        className="size-7 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
+        className="size-7 flex items-center justify-center rounded bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
         title="Course actions"
       >
         <MoreVertical className="size-3.5" style={{ color: COLORS.text }} strokeWidth={2} />
@@ -40,7 +40,7 @@ function AdminMenu({ course, onEdit, onSubtopics, onDelete }: Pick<Props, "cours
 
       {open && (
         <div
-          className="absolute right-0 top-8 w-44 bg-white rounded-xl border shadow-lg z-20 overflow-hidden"
+          className="absolute right-0 top-8 w-44 bg-white rounded-md border shadow-lg z-20 overflow-hidden"
           style={{ borderColor: COLORS.border, boxShadow: "0 4px 20px rgba(58,48,42,0.12)" }}
         >
           {[
@@ -86,7 +86,7 @@ export function CourseCard({ course, isAdmin, onEdit, onSubtopics, onDelete, onO
   return (
     <div
       onClick={() => hasSubtopics && onOpen(course)}
-      className="bg-white rounded-xl overflow-hidden border group transition-transform hover:-translate-y-1"
+      className="bg-white rounded-md overflow-hidden border group transition-transform hover:-translate-y-1"
       style={{ ...CARD_STYLE, cursor: hasSubtopics ? "pointer" : "default" }}
     >
       {/* Thumbnail */}
@@ -105,7 +105,7 @@ export function CourseCard({ course, isAdmin, onEdit, onSubtopics, onDelete, onO
 
         {/* Status badge */}
         <div
-          className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.12em] bg-white/90 backdrop-blur-sm"
+          className="absolute top-3 left-3 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-[0.12em] bg-white/90 backdrop-blur-sm"
           style={{ color: course.status === "Available" ? COLORS.scoreGood : COLORS.textFaint }}
         >
           {course.status}
@@ -114,7 +114,7 @@ export function CourseCard({ course, isAdmin, onEdit, onSubtopics, onDelete, onO
         {/* Subtopics count badge */}
         {course.subtopics?.length > 0 && (
           <div
-            className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/90 backdrop-blur-sm"
+            className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold bg-white/90 backdrop-blur-sm"
             style={{ color: COLORS.primary }}
           >
             <Layers className="size-3" strokeWidth={2} />
@@ -143,7 +143,7 @@ export function CourseCard({ course, isAdmin, onEdit, onSubtopics, onDelete, onO
           {visible.map((cat) => (
             <span
               key={cat}
-              className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.1em]"
+              className="px-3 py-1 rounded text-[10px] font-bold uppercase tracking-[0.1em]"
               style={{ background: COLORS.bgInput, color: COLORS.textMuted }}
             >
               {cat}
@@ -151,7 +151,7 @@ export function CourseCard({ course, isAdmin, onEdit, onSubtopics, onDelete, onO
           ))}
           {rest > 0 && (
             <span
-              className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.1em]"
+              className="px-3 py-1 rounded text-[10px] font-bold uppercase tracking-[0.1em]"
               style={{ background: COLORS.primaryLight, color: COLORS.primary }}
             >
               +{rest} More

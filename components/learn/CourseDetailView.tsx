@@ -30,7 +30,7 @@ function StatusBadge({ status }: { status: ContentStatus }) {
   const cfg = STATUS_CONFIG[status];
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-[0.1em]"
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.1em]"
       style={{ background: cfg.bg, color: cfg.color }}
     >
       {status === "generating" && <Loader2 className="size-2.5 animate-spin" />}
@@ -59,7 +59,7 @@ function SubtopicCard({ topic, index, isAdmin, localGenerating, onGenerate, onVi
   return (
     <div
       onClick={isDone ? onView : undefined}
-      className="group flex items-center gap-5 p-5 rounded-xl border transition-all duration-200 hover:-translate-y-0.5"
+      className="group flex items-center gap-5 p-5 rounded-md border transition-all duration-200 hover:-translate-y-0.5"
       style={{
         background:  isAlt ? "#fdfcfb" : "#ffffff",
         borderColor: COLORS.borderFaint,
@@ -74,7 +74,7 @@ function SubtopicCard({ topic, index, isAdmin, localGenerating, onGenerate, onVi
       }}
     >
       {/* Difficulty icon box */}
-      <div className="size-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: cfg.bg }}>
+      <div className="size-12 rounded-md flex items-center justify-center shrink-0" style={{ background: cfg.bg }}>
         <Icon className="size-5" style={{ color: cfg.color }} strokeWidth={1.8} />
       </div>
 
@@ -85,7 +85,7 @@ function SubtopicCard({ topic, index, isAdmin, localGenerating, onGenerate, onVi
         </h3>
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           <span
-            className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-[0.12em]"
+            className="inline-block px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.12em]"
             style={{ background: cfg.bg, color: cfg.color }}
           >
             {topic.difficulty}
@@ -103,7 +103,7 @@ function SubtopicCard({ topic, index, isAdmin, localGenerating, onGenerate, onVi
         {canGen && (
           <button
             onClick={(e) => { e.stopPropagation(); onGenerate(); }}
-            className="flex items-center gap-1.5 h-7 px-3 rounded-lg text-[10px] font-bold border transition-colors hover:bg-stone-50"
+            className="flex items-center gap-1.5 h-7 px-3 rounded text-[10px] font-bold border transition-colors hover:bg-stone-50"
             style={{ borderColor: COLORS.primary, color: COLORS.primary }}
           >
             <Sparkles className="size-3" strokeWidth={2} />
@@ -196,7 +196,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
           <div>
             <span
-              className="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.14em] mb-4"
+              className="inline-block px-3 py-1 rounded text-[10px] font-bold uppercase tracking-[0.14em] mb-4"
               style={{ background: COLORS.primaryLight, color: COLORS.primary }}
             >
               {primaryCategory}
@@ -210,7 +210,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
               {course.categories.map((cat) => (
                 <span
                   key={cat}
-                  className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.1em]"
+                  className="px-3 py-1 rounded text-[10px] font-bold uppercase tracking-[0.1em]"
                   style={{ background: "#f0e8e2", color: COLORS.textMuted }}
                 >
                   {cat}
@@ -224,7 +224,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
             {isAdmin && (
               <button
                 onClick={() => setEditOpen(true)}
-                className="flex items-center gap-2 h-10 px-5 rounded-lg text-sm font-bold border transition-colors hover:bg-stone-50"
+                className="flex items-center gap-2 h-10 px-5 rounded text-sm font-bold border transition-colors hover:bg-stone-50"
                 style={{ borderColor: COLORS.border, color: COLORS.primary }}
               >
                 <Edit2 className="size-4" strokeWidth={2} />
@@ -236,7 +236,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
                 href={course.sourceFileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 h-10 px-6 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+                className="flex items-center gap-2 h-10 px-6 rounded text-sm font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
                 style={{ background: COLORS.primary, boxShadow: `0 4px 20px ${COLORS.primaryShadow}` }}
               >
                 <GraduationCap className="size-4" strokeWidth={2} />
@@ -277,7 +277,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
             value={rawSearch}
             onChange={(e) => { setRawSearch(e.target.value); setPage(0); }}
             placeholder="Filter subtopics…"
-            className="w-full pl-11 pr-4 py-3 rounded-xl border text-sm focus:outline-none transition-all"
+            className="w-full pl-11 pr-4 py-3 rounded border text-sm focus:outline-none transition-all"
             style={{ borderColor: COLORS.border, color: COLORS.text, background: "#ffffff" }}
             onFocus={(e) => {
               e.currentTarget.style.borderColor = COLORS.primary;
@@ -297,7 +297,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
           <Layers className="size-5" style={{ color: COLORS.primary }} strokeWidth={1.8} />
           <h2 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>Subtopics</h2>
           <span
-            className="ml-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+            className="ml-1 px-2.5 py-0.5 rounded text-[10px] font-bold"
             style={{ background: COLORS.bgInput, color: COLORS.textFaint }}
           >
             {filtered.length}
@@ -305,7 +305,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-xl p-10 border flex flex-col items-center gap-3 text-center" style={CARD_STYLE}>
+          <div className="bg-white rounded-md p-10 border flex flex-col items-center gap-3 text-center" style={CARD_STYLE}>
             <Layers className="size-8" style={{ color: COLORS.textFaint }} strokeWidth={1.2} />
             <p className="text-sm" style={{ color: COLORS.textMuted }}>
               {rawSearch ? "No subtopics match your search." : "No subtopics yet."}
@@ -332,7 +332,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
                 <button
                   onClick={() => setPage((p) => p - 1)}
                   disabled={page === 0}
-                  className="flex items-center gap-1 px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-stone-50 disabled:opacity-30"
+                  className="flex items-center gap-1 px-3 py-2 text-sm rounded border transition-colors hover:bg-stone-50 disabled:opacity-30"
                   style={{ borderColor: COLORS.border, color: COLORS.textMuted }}
                 >
                   <ChevronLeft className="size-4" strokeWidth={2} />
@@ -344,7 +344,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
                     <button
                       key={i}
                       onClick={() => setPage(i)}
-                      className="size-9 flex items-center justify-center rounded-lg text-sm font-bold transition-all"
+                      className="size-9 flex items-center justify-center rounded text-sm font-bold transition-all"
                       style={page === i ? { background: COLORS.primary, color: "#fff" } : { color: COLORS.textMuted }}
                     >
                       {i + 1}
@@ -355,7 +355,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page === totalPages - 1}
-                  className="flex items-center gap-1 px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-stone-50 disabled:opacity-30"
+                  className="flex items-center gap-1 px-3 py-2 text-sm rounded border transition-colors hover:bg-stone-50 disabled:opacity-30"
                   style={{ borderColor: COLORS.border, color: COLORS.textMuted }}
                 >
                   Next
@@ -369,7 +369,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
 
       {/* Bottom CTA */}
       <div
-        className="mt-12 rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden"
+        className="mt-12 rounded-md p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden"
         style={{ background: COLORS.primary }}
       >
         <div className="absolute inset-0 opacity-10 pointer-events-none">
@@ -390,7 +390,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
             Complete all {totalCount} subtopics in this module to earn your Sahara Verified certificate.
           </p>
           <button
-            className="h-10 px-6 rounded-lg bg-white text-sm font-bold transition-all hover:scale-105 active:scale-95"
+            className="h-10 px-6 rounded bg-white text-sm font-bold transition-all hover:scale-105 active:scale-95"
             style={{ color: COLORS.primary }}
           >
             View Progress
@@ -398,7 +398,7 @@ export function CourseDetailView({ course, isAdmin, onBack, onEdit }: Props) {
         </div>
 
         <div className="relative z-10 shrink-0">
-          <div className="w-36 h-36 rounded-2xl flex flex-col items-center justify-center text-center border border-white/20 bg-white/10 backdrop-blur-sm">
+          <div className="w-36 h-36 rounded-md flex flex-col items-center justify-center text-center border border-white/20 bg-white/10 backdrop-blur-sm">
             <GraduationCap className="size-8 text-white mb-2" strokeWidth={1.5} />
             <span className="font-heading text-3xl text-white">{totalCount}</span>
             <span className="text-[10px] text-white/70 uppercase tracking-widest">

@@ -8,7 +8,7 @@ type InsightCardProps = {
 
 export function InsightCard({ avg }: InsightCardProps) {
   return (
-    <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+    <div className="bg-white rounded-md p-6 border" style={{ borderColor: COLORS.borderColor, boxShadow: "none" }}>
       <div className="size-12 rounded-full flex items-center justify-center mb-4 mx-auto" style={{ background: COLORS.accentBg }}>
         <Lightbulb className="size-5" style={{ color: COLORS.accent }} strokeWidth={1.5} />
       </div>

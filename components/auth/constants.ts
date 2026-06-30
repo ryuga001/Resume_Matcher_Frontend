@@ -11,7 +11,7 @@ export const REGISTER_PERKS = [
 ];
 
 export const INPUT_CLASS =
-  "w-full h-12 px-4 rounded-xl border text-sm outline-none transition-all";
+  "w-full h-12 px-4 rounded border text-sm outline-none transition-all";
 
 export const RIGHT_PANEL_STYLE = {
   backgroundColor: "#fdfcfb",

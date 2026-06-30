@@ -58,7 +58,7 @@ function MermaidDiagram({ code, title }: { code: string; title: string }) {
         </p>
       )}
       {error ? (
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: COLORS.borderMuted }}>
+        <div className="rounded-md border overflow-hidden" style={{ borderColor: COLORS.borderMuted }}>
           <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-[0.1em]" style={{ background: COLORS.bgInput, color: COLORS.textFaint }}>
             Diagram source
           </div>
@@ -69,7 +69,7 @@ function MermaidDiagram({ code, title }: { code: string; title: string }) {
       ) : (
         <div
           ref={ref}
-          className="flex justify-center p-6 rounded-xl border overflow-x-auto"
+          className="flex justify-center p-6 rounded-md border overflow-x-auto"
           style={{ borderColor: COLORS.borderMuted, background: "#fafaf9" }}
         />
       )}
@@ -100,7 +100,7 @@ function QuizSection({ questions }: { questions: QuizQuestion[] }) {
         const isRevealed = revealed[qi];
 
         return (
-          <div key={qi} className="p-6 rounded-xl border" style={{ borderColor: COLORS.borderMuted, background: "#fafaf9" }}>
+          <div key={qi} className="p-6 rounded-md border" style={{ borderColor: COLORS.borderMuted, background: "#fafaf9" }}>
             <p className="text-sm font-bold mb-4" style={{ color: COLORS.text }}>
               {qi + 1}. {q.question}
             </p>
@@ -124,7 +124,7 @@ function QuizSection({ questions }: { questions: QuizQuestion[] }) {
                   <button
                     key={oi}
                     onClick={() => select(qi, oi)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm text-left transition-all"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded border text-sm text-left transition-all"
                     style={{ borderColor, background: bg, color }}
                   >
                     <span
@@ -142,7 +142,7 @@ function QuizSection({ questions }: { questions: QuizQuestion[] }) {
             {!isRevealed && chosen !== undefined && (
               <button
                 onClick={() => reveal(qi)}
-                className="mt-4 h-8 px-4 rounded-lg text-xs font-bold text-white transition-all hover:opacity-90"
+                className="mt-4 h-8 px-4 rounded text-xs font-bold text-white transition-all hover:opacity-90"
                 style={{ background: COLORS.primary }}
               >
                 Check Answer
@@ -150,7 +150,7 @@ function QuizSection({ questions }: { questions: QuizQuestion[] }) {
             )}
 
             {isRevealed && (
-              <div className="mt-4 p-3 rounded-lg text-xs" style={{ background: COLORS.bgSurface, color: COLORS.textMuted }}>
+              <div className="mt-4 p-3 rounded text-xs" style={{ background: COLORS.bgSurface, color: COLORS.textMuted }}>
                 <strong style={{ color: COLORS.text }}>Explanation: </strong>
                 {q.explanation}
               </div>
@@ -161,7 +161,7 @@ function QuizSection({ questions }: { questions: QuizQuestion[] }) {
 
       {Object.keys(revealed).length === questions.length && (
         <div
-          className="p-5 rounded-xl text-center"
+          className="p-5 rounded-md text-center"
           style={{ background: COLORS.primaryLight, border: `1px solid ${COLORS.border}` }}
         >
           <p className="font-heading text-xl font-semibold mb-1" style={{ color: COLORS.primary }}>
@@ -188,7 +188,7 @@ function CodeBlock({ language, code, title, explanation }: { language: string; c
   }
 
   return (
-    <div className="rounded-xl overflow-hidden border" style={{ borderColor: COLORS.borderMuted }}>
+    <div className="rounded-md overflow-hidden border" style={{ borderColor: COLORS.borderMuted }}>
       <div
         className="flex items-center justify-between px-5 py-3"
         style={{ background: "#2a2826", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
@@ -264,7 +264,7 @@ function AdminEditor({
         <div className="flex items-center gap-2">
           <button
             onClick={onDone}
-            className="h-8 px-4 rounded-lg text-xs font-bold border transition-colors hover:bg-stone-50"
+            className="h-8 px-4 rounded text-xs font-bold border transition-colors hover:bg-stone-50"
             style={{ borderColor: COLORS.border, color: COLORS.textMuted }}
           >
             Cancel
@@ -272,7 +272,7 @@ function AdminEditor({
           <button
             onClick={save}
             disabled={isLoading}
-            className="flex items-center gap-1.5 h-8 px-4 rounded-lg text-xs font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-1.5 h-8 px-4 rounded text-xs font-bold text-white transition-all hover:opacity-90 disabled:opacity-50"
             style={{ background: COLORS.primary }}
           >
             {isLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" strokeWidth={2} />}
@@ -282,7 +282,7 @@ function AdminEditor({
       </div>
 
       {error && (
-        <p className="text-xs px-3 py-2 rounded-lg" style={{ background: "#fce4e0", color: "#b3261e" }}>
+        <p className="text-xs px-3 py-2 rounded" style={{ background: "#fce4e0", color: "#b3261e" }}>
           {error}
         </p>
       )}
@@ -290,7 +290,7 @@ function AdminEditor({
       <textarea
         value={raw}
         onChange={(e) => setRaw(e.target.value)}
-        className="w-full h-[60vh] p-5 rounded-xl border text-xs font-mono resize-y focus:outline-none transition-all"
+        className="w-full h-[60vh] p-5 rounded-md border text-xs font-mono resize-y focus:outline-none transition-all"
         style={{
           borderColor: COLORS.border,
           color: COLORS.text,
@@ -339,7 +339,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
         <button onClick={onBack} className="flex items-center gap-2 mb-8 text-sm font-medium" style={{ color: COLORS.textMuted }}>
           <ArrowLeft className="size-4" strokeWidth={2} /> Back
         </button>
-        <div className="p-10 rounded-xl border text-center" style={CARD_STYLE}>
+        <div className="p-10 rounded-md border text-center" style={CARD_STYLE}>
           <p className="text-sm" style={{ color: COLORS.textMuted }}>Content could not be loaded.</p>
         </div>
       </div>
@@ -368,12 +368,12 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
       {/* Hero */}
       <div className="mb-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div className="flex items-start gap-4">
-          <div className="size-14 rounded-xl flex items-center justify-center shrink-0" style={{ background: cfg.bg }}>
+          <div className="size-14 rounded-md flex items-center justify-center shrink-0" style={{ background: cfg.bg }}>
             <Icon className="size-7" style={{ color: cfg.color }} strokeWidth={1.8} />
           </div>
           <div>
             <span
-              className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-[0.12em] mb-2"
+              className="inline-block px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.12em] mb-2"
               style={{ background: cfg.bg, color: cfg.color }}
             >
               {subtopic.difficulty}
@@ -387,7 +387,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
         {isAdmin && !editing && (
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-2 h-10 px-5 rounded-lg text-sm font-bold border transition-colors hover:bg-stone-50 shrink-0"
+            className="flex items-center gap-2 h-10 px-5 rounded text-sm font-bold border transition-colors hover:bg-stone-50 shrink-0"
             style={{ borderColor: COLORS.border, color: COLORS.primary }}
           >
             <Edit3 className="size-4" strokeWidth={2} />
@@ -408,7 +408,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
         <div className="space-y-8">
           {/* Overview */}
           {content.overview && (
-            <div className="p-6 rounded-xl border" style={{ ...CARD_STYLE, borderLeft: `4px solid ${COLORS.primary}`, paddingLeft: "1.5rem" }}>
+            <div className="p-6 rounded-md border" style={{ ...CARD_STYLE, borderLeft: `4px solid ${COLORS.primary}`, paddingLeft: "1.5rem" }}>
               <p className="text-sm leading-relaxed" style={{ color: COLORS.textMuted }}>
                 {content.overview}
               </p>
@@ -422,7 +422,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
                 <BookOpen className="size-5" style={{ color: COLORS.primary }} strokeWidth={1.8} />
                 <h2 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>Theory</h2>
               </div>
-              <div className="bg-white rounded-xl p-6 border space-y-6" style={CARD_STYLE}>
+              <div className="bg-white rounded-md p-6 border space-y-6" style={CARD_STYLE}>
                 {content.theory.map((t, i) => (
                   <div key={i}>
                     {i > 0 && <hr className="mb-6" style={{ borderColor: COLORS.borderFaint }} />}
@@ -445,7 +445,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
                 <Layers className="size-5" style={{ color: COLORS.primary }} strokeWidth={1.8} />
                 <h2 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>Diagrams</h2>
               </div>
-              <div className="bg-white rounded-xl p-6 border space-y-8" style={CARD_STYLE}>
+              <div className="bg-white rounded-md p-6 border space-y-8" style={CARD_STYLE}>
                 {content.diagrams.map((d, i) => (
                   <div key={i}>
                     {i > 0 && <hr className="mb-8" style={{ borderColor: COLORS.borderFaint }} />}
@@ -479,7 +479,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
                 <Zap className="size-5" style={{ color: COLORS.primary }} strokeWidth={1.8} />
                 <h2 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>Key Takeaways</h2>
               </div>
-              <div className="bg-white rounded-xl p-6 border" style={CARD_STYLE}>
+              <div className="bg-white rounded-md p-6 border" style={CARD_STYLE}>
                 <ul className="space-y-3">
                   {content.key_points.map((pt, i) => (
                     <li key={i} className="flex items-start gap-3">
@@ -504,7 +504,7 @@ export function SubtopicContentView({ course, subtopic, isAdmin, onBack }: Props
                 <Zap className="size-5" style={{ color: COLORS.primary }} strokeWidth={1.8} />
                 <h2 className="font-heading text-2xl font-bold" style={{ color: COLORS.text }}>Knowledge Check</h2>
               </div>
-              <div className="bg-white rounded-xl p-6 border" style={CARD_STYLE}>
+              <div className="bg-white rounded-md p-6 border" style={CARD_STYLE}>
                 <QuizSection questions={content.quiz} />
               </div>
             </section>

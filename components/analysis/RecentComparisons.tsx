@@ -36,11 +36,11 @@ function HistoryCard({ item }: { item: HistoryItem }) {
   return (
     <Link
       href={`/history/${item.id}`}
-      className="p-5 rounded-xl border transition-colors hover:bg-white"
+      className="p-5 rounded-md border transition-colors hover:bg-white"
       style={{ background: "rgba(255,255,255,0.6)", borderColor: COLORS.border }}
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase" style={badgeStyle}>
+        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded uppercase" style={badgeStyle}>
           {item.atsScore}% Match
         </span>
         <span className="text-[10px]" style={{ color: COLORS.textFaint }}>

@@ -42,7 +42,7 @@ export function FilterBar({ search, onSearch, category, onCategory, statusFilter
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Search modules…"
-          className="w-full pl-9 pr-4 py-2.5 rounded-lg border text-sm bg-white focus:outline-none transition-all"
+          className="w-full pl-9 pr-4 py-2.5 rounded border text-sm bg-white focus:outline-none transition-all"
           style={{ borderColor: COLORS.border, color: COLORS.text }}
           onFocus={(e) => {
             e.currentTarget.style.borderColor = COLORS.primary;
@@ -59,7 +59,7 @@ export function FilterBar({ search, onSearch, category, onCategory, statusFilter
       <div className="relative" ref={catRef}>
         <button
           onClick={() => setCatOpen((v) => !v)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border bg-white text-sm font-medium transition-colors hover:bg-stone-50 w-full sm:w-52"
+          className="flex items-center gap-2 px-4 py-2.5 rounded border bg-white text-sm font-medium transition-colors hover:bg-stone-50 w-full sm:w-52"
           style={{ borderColor: COLORS.border, color: category ? COLORS.primary : COLORS.textMuted }}
         >
           <span className="flex-1 text-left truncate">{category || "All Categories"}</span>
@@ -68,7 +68,7 @@ export function FilterBar({ search, onSearch, category, onCategory, statusFilter
 
         {catOpen && (
           <div
-            className="absolute top-full mt-1.5 left-0 w-56 bg-white rounded-xl border shadow-md z-20 overflow-hidden"
+            className="absolute top-full mt-1.5 left-0 w-56 bg-white rounded-md border shadow-md z-20 overflow-hidden"
             style={{ borderColor: COLORS.border }}
           >
             {/* Internal search */}
@@ -78,7 +78,7 @@ export function FilterBar({ search, onSearch, category, onCategory, statusFilter
                 value={catSearch}
                 onChange={(e) => setCatSearch(e.target.value)}
                 placeholder="Search…"
-                className="w-full px-3 py-1.5 text-xs rounded-lg border focus:outline-none"
+                className="w-full px-3 py-1.5 text-xs rounded border focus:outline-none"
                 style={{ borderColor: COLORS.border }}
               />
             </div>
@@ -114,7 +114,7 @@ export function FilterBar({ search, onSearch, category, onCategory, statusFilter
       <select
         value={statusFilter}
         onChange={(e) => onStatus(e.target.value as CourseStatus | "")}
-        className="px-4 py-2.5 rounded-lg border bg-white text-sm focus:outline-none transition-all"
+        className="px-4 py-2.5 rounded border bg-white text-sm focus:outline-none transition-all"
         style={{ borderColor: COLORS.border, color: statusFilter ? COLORS.primary : COLORS.textMuted }}
       >
         <option value="">All Status</option>

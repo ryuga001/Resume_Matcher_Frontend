@@ -26,7 +26,7 @@ export function SecuritySection({
         <ShieldCheck className="size-5" style={{ color: "#c2652a" }} strokeWidth={1.8} />
         <h3 className="font-heading text-2xl font-bold" style={{ color: "#2a2826" }}>Security</h3>
       </div>
-      <div className="bg-white rounded-xl p-6 border" style={SECTION_CARD_STYLE}>
+      <div className="bg-white rounded-md p-6 border" style={SECTION_CARD_STYLE}>
         <form onSubmit={onSave} className="max-w-xl space-y-4">
           <SettingsInput
             label="Current Password"
@@ -58,7 +58,7 @@ export function SecuritySection({
           <button
             type="submit"
             disabled={pwLoading || !currentPw || !newPw || !confirmPw}
-            className="h-10 px-6 rounded-lg text-sm font-semibold border hover:bg-stone-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+            className="h-10 px-6 rounded text-sm font-semibold border hover:bg-stone-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
             style={{ borderColor: "#c2652a", color: "#c2652a" }}
           >
             {pwLoading && <Loader2 className="size-3.5 animate-spin" />}
