@@ -1,5 +1,6 @@
-const API_ROOT = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
-const BASE = API_ROOT ? `${API_ROOT}/api` : "/api";
+// Same-origin path; proxied to the backend by next.config rewrites so cookies
+// remain first-party on the frontend domain.
+const BASE = "/api";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;

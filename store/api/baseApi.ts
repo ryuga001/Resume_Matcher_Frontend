@@ -1,10 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { clearUser } from "../slices/authSlice";
 
-const API_ROOT = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
-
+// Browser always calls the same-origin /api path; next.config rewrites proxy
+// it to the backend (NEXT_PUBLIC_API_BASE_URL) so auth cookies stay first-party.
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: API_ROOT ? `${API_ROOT}/api` : "/api",
+  baseUrl: "/api",
   credentials: "include",
 });
 
