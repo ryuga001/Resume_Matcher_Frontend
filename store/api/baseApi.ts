@@ -1,8 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { clearUser } from "../slices/authSlice";
 
+const API_ROOT = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
+
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "/api",
+  baseUrl: API_ROOT ? `${API_ROOT}/api` : "/api",
   credentials: "include",
 });
 

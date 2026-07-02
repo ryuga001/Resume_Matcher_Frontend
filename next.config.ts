@@ -5,10 +5,11 @@ const nextConfig: NextConfig = {
     proxyTimeout: 120_000, 
   },
   async rewrites() {
+    const backend = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") ?? "http://127.0.0.1:8000";
     return [
       {
         source: "/api/:path*",
-        destination: "http://127.0.0.1:8000/api/:path*",
+        destination: `${backend}/api/:path*`,
       },
     ];
   },

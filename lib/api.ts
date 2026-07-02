@@ -1,4 +1,5 @@
-const BASE = "/api";
+const API_ROOT = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
+const BASE = API_ROOT ? `${API_ROOT}/api` : "/api";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
